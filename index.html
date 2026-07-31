@@ -4,290 +4,246 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Gonzalo Bustamante Rojas</title>
-<meta name="description" content="Investigador y consultor. Encuestas, cohortes generacionales, confianza institucional y escritura pública sobre metodología.">
+<meta name="description" content="Gonzalo Bustamante Rojas — investigador asociado al Centro de Encuestas y Estudios Longitudinales UC.">
 <link rel="icon" href="data:,">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root{
-    --paper:#F7F5EF;
-    --paper-alt:#EEEAE0;
-    --ink:#1B1A17;
-    --ink-soft:#5B5848;
-    --signal:#1D4E89;
-    --redpen:#B0392C;
-    --line:#DCD6C6;
-    --radius:2px;
-  }
-  @media (prefers-color-scheme: dark){
-    :root{
-      --paper:#15140F;
-      --paper-alt:#1D1B15;
-      --ink:#ECE8DC;
-      --ink-soft:#9C9683;
-      --signal:#7EA6DD;
-      --redpen:#E08370;
-      --line:#332F24;
-    }
+    --bg:#0A0B0E;
+    --ink:#EDECE6;
+    --ink-soft:#8B8C92;
+    --line:#EDECE6;
   }
   *{box-sizing:border-box;}
-  html{scroll-behavior:smooth;}
-  @media (prefers-reduced-motion: reduce){
-    html{scroll-behavior:auto;}
-    *{animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important;}
-  }
+  html,body{height:100%;}
   body{
     margin:0;
-    background:var(--paper);
+    background:var(--bg);
     color:var(--ink);
-    font-family:'IBM Plex Sans', system-ui, sans-serif;
-    font-size:16px;
-    line-height:1.6;
-    -webkit-font-smoothing:antialiased;
+    font-family:'Instrument Sans', system-ui, sans-serif;
+    overflow-x:hidden;
   }
-  a{color:var(--signal);}
-  a:focus-visible, button:focus-visible{outline:2px solid var(--signal); outline-offset:3px;}
-
-  .mono{font-family:'IBM Plex Mono', monospace;}
-  .wrap{max-width:760px; margin:0 auto; padding:0 24px;}
-
-  /* --- nav --- */
-  nav{
-    position:sticky; top:0; z-index:10;
-    background:color-mix(in srgb, var(--paper) 88%, transparent);
-    backdrop-filter:blur(6px);
-    border-bottom:1px solid var(--line);
-  }
-  nav .wrap{display:flex; justify-content:space-between; align-items:center; padding:14px 24px;}
-  nav .brand{font-family:'IBM Plex Mono', monospace; font-size:13px; letter-spacing:0.02em; color:var(--ink-soft); text-decoration:none;}
-  nav ul{list-style:none; display:flex; gap:20px; margin:0; padding:0;}
-  nav a{color:var(--ink); text-decoration:none; font-size:14px; font-family:'IBM Plex Mono', monospace;}
-  nav a:hover{color:var(--signal);}
-  nav .menu-toggle{display:none;}
-  @media (max-width:560px){
-    nav ul{gap:14px;}
-    nav a{font-size:12px;}
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.01ms !important; transition-duration:0.01ms !important;}
   }
 
-  /* --- hero / ficha técnica --- */
-  header.hero{padding:64px 0 40px;}
-  .eyebrow{
-    font-family:'IBM Plex Mono', monospace;
-    font-size:12px;
-    letter-spacing:0.14em;
-    text-transform:uppercase;
-    color:var(--ink-soft);
-    margin:0 0 18px;
-  }
-  h1{
-    font-family:'IBM Plex Serif', serif;
-    font-weight:600;
-    font-size:clamp(2.1rem, 5vw, 3.1rem);
-    line-height:1.08;
-    margin:0 0 18px;
-    letter-spacing:-0.01em;
-  }
-  .tagline{
-    font-size:1.15rem;
-    color:var(--ink-soft);
-    max-width:60ch;
-    margin:0 0 40px;
-  }
-  .tagline mark{
-    background:none;
-    color:var(--ink);
-    text-decoration:underline;
-    text-decoration-color:var(--redpen);
-    text-decoration-thickness:2px;
-    text-underline-offset:3px;
+  canvas#net{
+    position:fixed;
+    inset:0;
+    width:100%;
+    height:100%;
+    display:block;
+    pointer-events:none;
   }
 
-  .ficha{
-    border:1px solid var(--line);
-    border-radius:var(--radius);
-    background:var(--paper-alt);
-    padding:22px 24px 24px;
-    opacity:0;
-    animation:rise 0.6s ease-out 0.15s forwards;
-  }
-  @keyframes rise{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
-  .ficha-title{
-    font-family:'IBM Plex Mono', monospace;
-    font-size:11px;
-    letter-spacing:0.14em;
-    text-transform:uppercase;
-    color:var(--ink-soft);
-    margin:0 0 14px;
-    padding-bottom:10px;
-    border-bottom:1px dashed var(--line);
-  }
-  dl.ficha-rows{margin:0; display:grid; grid-template-columns:auto 1fr; column-gap:18px; row-gap:10px;}
-  dl.ficha-rows dt{
-    font-family:'IBM Plex Mono', monospace;
-    font-size:12.5px;
-    color:var(--ink-soft);
-    white-space:nowrap;
-    padding-top:1px;
-  }
-  dl.ficha-rows dd{margin:0; font-size:14.5px;}
-  .err{color:var(--redpen); font-family:'IBM Plex Mono', monospace;}
-
-  /* --- sections --- */
-  section{padding:52px 0; border-top:1px solid var(--line);}
-  h2{
-    font-family:'IBM Plex Serif', serif;
-    font-weight:600;
-    font-size:1.5rem;
-    margin:0 0 22px;
+  main{
+    position:relative;
+    z-index:1;
+    min-height:100vh;
     display:flex;
-    align-items:baseline;
-    gap:10px;
+    flex-direction:column;
+    justify-content:center;
+    padding:8vh 8vw;
   }
-  h2 .tag{
-    font-family:'IBM Plex Mono', monospace;
-    font-size:12px;
-    color:var(--signal);
-    font-weight:400;
-  }
-  p{margin:0 0 16px; max-width:66ch;}
-  .lede{color:var(--ink-soft);}
 
-  ul.lines{list-style:none; margin:0; padding:0;}
-  ul.lines li{
-    padding:16px 0;
-    border-top:1px solid var(--line);
+  .intro{
+    max-width:34rem;
   }
-  ul.lines li:first-child{border-top:none; padding-top:0;}
-  ul.lines h3{
-    font-family:'IBM Plex Sans', sans-serif;
-    font-weight:600;
-    font-size:1rem;
-    margin:0 0 6px;
-  }
-  ul.lines p{margin:0; color:var(--ink-soft); font-size:0.95rem;}
 
-  .clip{
-    border-left:3px solid var(--redpen);
-    padding:4px 0 4px 18px;
-    margin:20px 0;
-  }
-  .clip .clip-date{font-family:'IBM Plex Mono', monospace; font-size:12px; color:var(--ink-soft); display:block; margin-bottom:4px;}
-  .clip h3{font-family:'IBM Plex Serif', serif; font-size:1.15rem; font-weight:600; margin:0 0 6px;}
-  .clip q{display:block; font-style:italic; color:var(--ink-soft); font-size:0.95rem;}
-
-  .contact-grid{display:flex; flex-wrap:wrap; gap:12px;}
-  .contact-grid a{
-    display:inline-flex; align-items:center; gap:8px;
-    border:1px solid var(--line);
-    padding:10px 16px;
-    border-radius:var(--radius);
-    text-decoration:none;
+  h1{
+    font-weight:500;
+    font-size:clamp(1.7rem, 3.4vw, 2.35rem);
+    letter-spacing:-0.01em;
+    margin:0 0 1.6em;
     color:var(--ink);
-    font-size:14px;
-    font-family:'IBM Plex Mono', monospace;
-    transition:border-color 0.15s, color 0.15s;
   }
-  .contact-grid a:hover{border-color:var(--signal); color:var(--signal);}
 
-  footer{padding:28px 0 48px;}
-  footer p{font-size:12.5px; color:var(--ink-soft); font-family:'IBM Plex Mono', monospace; margin:0;}
+  p{
+    font-weight:400;
+    font-size:1rem;
+    line-height:1.75;
+    color:var(--ink-soft);
+    margin:0 0 0.9em;
+    max-width:32rem;
+  }
+
+  p a{
+    color:var(--ink);
+    text-decoration:none;
+    border-bottom:1px solid var(--line);
+    transition:opacity 0.2s;
+  }
+  p a:hover{opacity:0.6;}
+
+  .contact{
+    margin-top:2.6em;
+    display:flex;
+    flex-wrap:wrap;
+    gap:1.4em;
+  }
+  .contact a{
+    color:var(--ink-soft);
+    text-decoration:none;
+    font-size:0.85rem;
+    letter-spacing:0.02em;
+    border-bottom:1px solid transparent;
+    transition:color 0.2s, border-color 0.2s;
+  }
+  .contact a:hover{
+    color:var(--ink);
+    border-color:var(--ink-soft);
+  }
+
+  a:focus-visible{outline:1px solid var(--ink-soft); outline-offset:4px;}
 </style>
 </head>
 <body>
 
-<nav>
-  <div class="wrap">
-    <a class="brand" href="#top">GBR / 01</a>
-    <ul>
-      <li><a href="#sobre-mi">Sobre mí</a></li>
-      <li><a href="#investigacion">Investigación</a></li>
-      <li><a href="#escritura">Escritura</a></li>
-      <li><a href="#consultoria">Consultoría</a></li>
-      <li><a href="#contacto">Contacto</a></li>
-    </ul>
+<canvas id="net"></canvas>
+
+<main>
+  <div class="intro">
+    <h1>Gonzalo, 29</h1>
+    <p>Investigador asociado al <a href="https://encuestas.uc.cl/">Centro de Encuestas y Estudios Longitudinales UC</a>.</p>
+    <p>Cientista Familiar (UFT) y Magíster en Sociología (PUC).</p>
+    <p>Me gustan los gatos y el shoegaze.</p>
+
+    <div class="contact">
+      <a href="mailto:brojasgonzalo@gmail.com">Correo</a>
+      <a href="https://github.com/brojasgonzalo">GitHub</a>
+      <a href="https://www.linkedin.com/in/gonzalo-b-rojas/">LinkedIn</a>
+      <a href="https://www.ciperchile.cl/author/gonzalo-bustamante-rojas/">CIPER</a>
+    </div>
   </div>
-</nav>
+</main>
 
-<div id="top" class="wrap">
-  <header class="hero">
-    <p class="eyebrow">Ficha técnica — página personal</p>
-    <h1>Gonzalo Bustamante Rojas</h1>
-    <p class="tagline">Investigador y consultor. Trabajo con encuestas, paneles y cohortes generacionales — y de vez en cuando escribo sobre <mark>cuándo esas mismas encuestas dejan de medir algo</mark>.</p>
+<script>
+(function(){
+  var canvas = document.getElementById('net');
+  var ctx = canvas.getContext('2d');
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    <div class="ficha">
-      <p class="ficha-title">Instrumento aplicado a sí mismo</p>
-      <dl class="ficha-rows">
-        <dt>Universo</dt>
-        <dd>Investigación aplicada, consultoría y escritura pública</dd>
-        <dt>Método</dt>
-        <dd>Modelos jerárquicos, paneles longitudinales, encuestas</dd>
-        <dt>Cobertura</dt>
-        <dd>Chile, principalmente</dd>
-        <dt>Margen de error</dt>
-        <dd>Bajo <span class="err">— y siempre declarado</span></dd>
-      </dl>
-    </div>
-  </header>
+  var W, H, DPR;
+  var nodes = [];
+  var mouse = { x: -9999, y: -9999, active: false };
 
-  <section id="sobre-mi">
-    <h2><span class="tag">§01</span> Sobre mí</h2>
-    <p>Magíster en Sociología por la Pontificia Universidad Católica de Chile y licenciado en Ciencias Sociales, mención Estudios de Familia, por la Universidad Finis Terrae.</p>
-    <p>Investigador en el Centro de Encuestas y Estudios Longitudinales UC, y fundador y director general de <strong>Agenda Pública Consultores</strong>.</p>
-  </section>
+  var LINK_DIST = 130;      // líneas entre nodos hasta esta distancia
+  var REPEL_RADIUS = 130;   // radio de perturbación del cursor
+  var REPEL_STRENGTH = 28;  // qué tan fuerte empuja (desplazamiento, no atracción)
+  var DRIFT = 0.09;         // velocidad ambiental, deliberadamente lenta
 
-  <section id="investigacion">
-    <h2><span class="tag">§02</span> Investigación</h2>
-    <p class="lede">Análisis cuantitativo de actitudes, valores y comportamiento social a partir de encuestas y datos longitudinales chilenos.</p>
-    <ul class="lines">
-      <li>
-        <h3>Confianza institucional y cohortes generacionales</h3>
-        <p>Ponencia aceptada en el 4to Congreso Latinoamericano de Ciencias Sociales y Gobierno de la Triada 2026 (con Alonso Quintero Contreras), sobre la Generación del estallido y la confianza en las instituciones chilenas. Código y resultados en <a href="https://github.com/brojasgonzalo/confianza-institucional-generaciones-chile">GitHub</a>.</p>
-      </li>
-      <li>
-        <h3>Actitudes, valores y cambio cultural</h3>
-        <p>Trayectorias de valores emancipativos y postmaterialistas a través de cohortes y períodos.</p>
-      </li>
-      <li>
-        <h3>Familia, fecundidad y trabajo</h3>
-        <p>Comportamiento reproductivo, paternidad y transiciones laborales.</p>
-      </li>
-      <li>
-        <h3>Metodología de encuestas</h3>
-        <p>Diseño muestral, paneles longitudinales y los límites de lo que una encuesta puede sostener.</p>
-      </li>
-    </ul>
-  </section>
+  function nodeCount(){
+    var area = window.innerWidth * window.innerHeight;
+    return Math.max(40, Math.min(110, Math.round(area / 16000)));
+  }
 
-  <section id="escritura">
-    <h2><span class="tag">§03</span> Escritura pública</h2>
-    <p>Escribo en <a href="https://www.ciperchile.cl/author/gonzalo-bustamante-rojas/">CIPER Chile</a> sobre metodología de encuestas, sondeos y su relación con la vida democrática.</p>
-    <div class="clip">
-      <span class="clip-date">30 de marzo de 2026 — CIPER</span>
-      <h3>Nueva metodología Cadem y el arte de parecer riguroso</h3>
-      <q>Antes de preguntarnos si las encuestas distorsionan la democracia, habría que preguntarse si todavía miden algo.</q>
-    </div>
-  </section>
+  function resize(){
+    DPR = Math.min(window.devicePixelRatio || 1, 2);
+    W = window.innerWidth;
+    H = window.innerHeight;
+    canvas.width = W * DPR;
+    canvas.height = H * DPR;
+    canvas.style.width = W + 'px';
+    canvas.style.height = H + 'px';
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  }
 
-  <section id="consultoria">
-    <h2><span class="tag">§04</span> Consultoría</h2>
-    <p>Dirijo <strong>Agenda Pública Consultores</strong>, donde trabajamos con datos de encuestas y análisis aplicado para organizaciones que necesitan entender a la ciudadanía, no solo medirla.</p>
-  </section>
+  function makeNodes(){
+    var n = nodeCount();
+    nodes = [];
+    for (var i = 0; i < n; i++){
+      var angle = Math.random() * Math.PI * 2;
+      nodes.push({
+        x: Math.random() * W,
+        y: Math.random() * H,
+        vx: Math.cos(angle) * DRIFT,
+        vy: Math.sin(angle) * DRIFT,
+        r: 1 + Math.random() * 1.2
+      });
+    }
+  }
 
-  <section id="contacto">
-    <h2><span class="tag">§05</span> Contacto</h2>
-    <div class="contact-grid">
-      <a href="mailto:brojasgonzalo@gmail.com">Correo →</a>
-      <a href="https://github.com/brojasgonzalo">GitHub →</a>
-      <a href="https://www.linkedin.com/in/gonzalo-b-rojas/">LinkedIn →</a>
-      <a href="https://www.ciperchile.cl/author/gonzalo-bustamante-rojas/">CIPER →</a>
-    </div>
-  </section>
+  function step(){
+    ctx.clearRect(0, 0, W, H);
 
-  <footer>
-    <p>Gonzalo Bustamante Rojas — actualizado 2026.</p>
-  </footer>
-</div>
+    for (var i = 0; i < nodes.length; i++){
+      var a = nodes[i];
+
+      // deriva ambiental, lenta y constante
+      a.x += a.vx;
+      a.y += a.vy;
+
+      // envolver en los bordes
+      if (a.x < -10) a.x = W + 10;
+      if (a.x > W + 10) a.x = -10;
+      if (a.y < -10) a.y = H + 10;
+      if (a.y > H + 10) a.y = -10;
+
+      // perturbación del cursor: empuja, no atrae
+      if (mouse.active){
+        var dx = a.x - mouse.x;
+        var dy = a.y - mouse.y;
+        var dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < REPEL_RADIUS && dist > 0.001){
+          var force = (1 - dist / REPEL_RADIUS);
+          a.x += (dx / dist) * force * REPEL_STRENGTH * 0.06;
+          a.y += (dy / dist) * force * REPEL_STRENGTH * 0.06;
+        }
+      }
+    }
+
+    // líneas entre nodos cercanos
+    ctx.lineWidth = 1;
+    for (var i = 0; i < nodes.length; i++){
+      for (var j = i + 1; j < nodes.length; j++){
+        var a = nodes[i], b = nodes[j];
+        var dx = a.x - b.x, dy = a.y - b.y;
+        var dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < LINK_DIST){
+          var op = (1 - dist / LINK_DIST) * 0.16;
+          ctx.strokeStyle = 'rgba(237,236,230,' + op.toFixed(3) + ')';
+          ctx.beginPath();
+          ctx.moveTo(a.x, a.y);
+          ctx.lineTo(b.x, b.y);
+          ctx.stroke();
+        }
+      }
+    }
+
+    // nodos
+    ctx.fillStyle = 'rgba(237,236,230,0.55)';
+    for (var i = 0; i < nodes.length; i++){
+      var a = nodes[i];
+      ctx.beginPath();
+      ctx.arc(a.x, a.y, a.r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    if (!reduceMotion) requestAnimationFrame(step);
+  }
+
+  window.addEventListener('mousemove', function(e){
+    mouse.x = e.clientX;
+    mouse.y = e.clientY;
+    mouse.active = true;
+  });
+  window.addEventListener('mouseleave', function(){
+    mouse.active = false;
+  });
+
+  window.addEventListener('resize', function(){
+    resize();
+    makeNodes();
+    if (reduceMotion) step();
+  });
+
+  resize();
+  makeNodes();
+  step();
+})();
+</script>
 
 </body>
 </html>
