@@ -46,11 +46,24 @@
     flex-direction:column;
     justify-content:center;
     padding:8vh 8vw;
+    perspective:1200px;
   }
 
   .intro{
     max-width:34rem;
+    transform-style:preserve-3d;
+    transform:rotateX(0deg) rotateY(0deg);
+    will-change:transform;
   }
+
+  .intro > *{
+    transform-style:preserve-3d;
+  }
+
+  h1{ transform:translateZ(46px); }
+  .subtitle{ transform:translateZ(28px); }
+  .intro > p{ transform:translateZ(18px); }
+  .contact{ transform:translateZ(34px); }
 
   h1{
     font-weight:500;
@@ -173,6 +186,17 @@
   var REPEL_RADIUS = 130;      // radio de perturbación del cursor
   var REPEL_STRENGTH = 0.9;    // impulso del cursor (empuja, no atrae)
 
+  // Profundidad: cada nodo vive en un plano z entre 0.15 (lejos) y 1 (cerca).
+  // No hay proyección de perspectiva real (dividir por z) porque el campo
+  // ya es 2D y plano — en cambio simulamos la sensación de profundidad con
+  // tres señales baratas y consistentes entre sí: los nodos cercanos son
+  // más grandes, más brillantes y se mueven más rápido (parallax de
+  // movimiento propio), y además todo el plano se desplaza según el mouse
+  // en proporción a z, como capas de un diorama.
+  var PARALLAX_SHIFT = 46;     // desplazamiento máx. de la capa más cercana, en px
+
+  var camera = { x: 0, y: 0 };
+
   function nodeCount(){
     var area = window.innerWidth * window.innerHeight;
     return Math.max(220, Math.min(450, Math.round(area / 4500)));
@@ -199,7 +223,8 @@
         vx: 0,
         vy: 0,
         angle: Math.random() * Math.PI * 2,
-        r: 1 + Math.random() * 1.2
+        r: 1 + Math.random() * 1.2,
+        z: 0.15 + Math.random() * 0.85
       });
     }
   }
@@ -207,9 +232,24 @@
   function step(){
     ctx.clearRect(0, 0, W, H);
 
+    // paralaje de cámara: todo el plano se corre según la posición del
+    // mouse relativa al centro, y cada nodo obedece en proporción a su z
+    // (las capas cercanas se mueven más que las lejanas) — es la señal
+    // de profundidad más fuerte de las tres.
+    if (mouse.active){
+      var camTx = (mouse.x / W - 0.5) * PARALLAX_SHIFT;
+      var camTy = (mouse.y / H - 0.5) * PARALLAX_SHIFT;
+      camera.x += (camTx - camera.x) * 0.04;
+      camera.y += (camTy - camera.y) * 0.04;
+    } else {
+      camera.x *= 0.96; camera.y *= 0.96;
+    }
+
     // un solo recorrido por cada par: calcula la fuerza entre ambos
     // nodos y, si están lo bastante cerca, dibuja la línea que los une
-    // (la línea es literalmente "acá hay una fuerza actuando").
+    // (la línea es literalmente "acá hay una fuerza actuando"). la
+    // posición usada para dibujar incluye el corrimiento de paralaje,
+    // pero la física (distancias, repulsión) sigue el plano real.
     ctx.lineWidth = 1;
     for (var i = 0; i < nodes.length; i++){
       var a = nodes[i];
@@ -228,13 +268,14 @@
           b.vx -= nx * f; b.vy -= ny * f;
         }
 
-        var op = (1 - dist / LINK_DIST) * 0.16;
+        var zAvg = (a.z + b.z) * 0.5;
+        var op = (1 - dist / LINK_DIST) * 0.16 * (0.35 + zAvg * 0.9);
         var key = (i * 7 + j * 13) % 10;
         var rgb = key < 8 ? '237,236,230' : (key === 8 ? '138,164,214' : '196,150,120');
         ctx.strokeStyle = 'rgba(' + rgb + ',' + op.toFixed(3) + ')';
         ctx.beginPath();
-        ctx.moveTo(a.x, a.y);
-        ctx.lineTo(b.x, b.y);
+        ctx.moveTo(a.x + camera.x * a.z, a.y + camera.y * a.z);
+        ctx.lineTo(b.x + camera.x * b.z, b.y + camera.y * b.z);
         ctx.stroke();
       }
     }
@@ -242,13 +283,16 @@
     // integración: deriva suave de rumbo (no ruido puro — el ángulo gira
     // apenas cada frame, como una corriente que cambia de a poco, no
     // como una partícula vibrando al azar), perturbación del cursor,
-    // fricción, tope de velocidad, y avance de posición
+    // fricción, tope de velocidad, y avance de posición. la velocidad
+    // base y el tope se escalan por z: las capas cercanas se sienten
+    // más rápidas, las lejanas casi quietas — parallax de movimiento.
     for (var i = 0; i < nodes.length; i++){
       var a = nodes[i];
+      var zScale = 0.35 + a.z * 0.9;
 
       a.angle += (Math.random() - 0.5) * ANGLE_JITTER;
-      a.vx += Math.cos(a.angle) * WANDER_FORCE;
-      a.vy += Math.sin(a.angle) * WANDER_FORCE;
+      a.vx += Math.cos(a.angle) * WANDER_FORCE * zScale;
+      a.vy += Math.sin(a.angle) * WANDER_FORCE * zScale;
 
       if (mouse.active){
         var mdx = a.x - mouse.x, mdy = a.y - mouse.y;
@@ -262,7 +306,8 @@
 
       a.vx *= DAMPING; a.vy *= DAMPING;
       var speed = Math.sqrt(a.vx * a.vx + a.vy * a.vy);
-      if (speed > MAX_SPEED){ a.vx = (a.vx / speed) * MAX_SPEED; a.vy = (a.vy / speed) * MAX_SPEED; }
+      var maxSpeed = MAX_SPEED * zScale;
+      if (speed > maxSpeed){ a.vx = (a.vx / speed) * maxSpeed; a.vy = (a.vy / speed) * maxSpeed; }
 
       a.x += a.vx; a.y += a.vy;
 
@@ -272,12 +317,17 @@
       if (a.y > H + 10) a.y = -10;
     }
 
-    // nodos
-    ctx.fillStyle = 'rgba(237,236,230,0.55)';
-    for (var i = 0; i < nodes.length; i++){
-      var a = nodes[i];
+    // nodos: ordenados de lejos a cerca para que los cercanos —más
+    // grandes y brillantes— queden dibujados encima, como en cualquier
+    // escena con profundidad real.
+    var ordered = nodes.slice().sort(function(p, q){ return p.z - q.z; });
+    for (var i = 0; i < ordered.length; i++){
+      var a = ordered[i];
+      var alpha = 0.18 + a.z * 0.55;
+      var radius = a.r * (0.5 + a.z * 1.1);
+      ctx.fillStyle = 'rgba(237,236,230,' + alpha.toFixed(3) + ')';
       ctx.beginPath();
-      ctx.arc(a.x, a.y, a.r, 0, Math.PI * 2);
+      ctx.arc(a.x + camera.x * a.z, a.y + camera.y * a.z, radius, 0, Math.PI * 2);
       ctx.fill();
     }
 
@@ -302,6 +352,33 @@
   resize();
   makeNodes();
   step();
+
+  // tilt 3D del bloque de texto: el mismo cursor que mueve las capas del
+  // canvas también inclina el contenido, como si fuera una tarjeta
+  // flotando sobre la escena — refuerza la lectura de profundidad en
+  // lugar de competir con ella.
+  if (!reduceMotion){
+    var intro = document.querySelector('.intro');
+    var tilt = { rx: 0, ry: 0, targetRx: 0, targetRy: 0 };
+
+    window.addEventListener('mousemove', function(e){
+      var nx = e.clientX / window.innerWidth - 0.5;
+      var ny = e.clientY / window.innerHeight - 0.5;
+      tilt.targetRx = -ny * 9;
+      tilt.targetRy = nx * 12;
+    });
+    window.addEventListener('mouseleave', function(){
+      tilt.targetRx = 0;
+      tilt.targetRy = 0;
+    });
+
+    (function tiltStep(){
+      tilt.rx += (tilt.targetRx - tilt.rx) * 0.06;
+      tilt.ry += (tilt.targetRy - tilt.ry) * 0.06;
+      intro.style.transform = 'rotateX(' + tilt.rx.toFixed(2) + 'deg) rotateY(' + tilt.ry.toFixed(2) + 'deg)';
+      requestAnimationFrame(tiltStep);
+    })();
+  }
 })();
 </script>
 
