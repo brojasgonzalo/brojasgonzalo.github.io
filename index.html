@@ -6,9 +6,6 @@
 <title>Gonzalo Bustamante Rojas</title>
 <meta name="description" content="Gonzalo Bustamante Rojas — investigador asociado al Centro de Encuestas y Estudios Longitudinales UC.">
 <link rel="icon" href="data:,">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root{
     --bg:#0A0B0E;
@@ -22,11 +19,14 @@
     margin:0;
     background:var(--bg);
     color:var(--ink);
-    font-family:'Instrument Sans', system-ui, sans-serif;
+    font-family:'Times New Roman', 'Liberation Serif', Georgia, 'Nimbus Roman', serif;
     overflow-x:hidden;
   }
   @media (prefers-reduced-motion: reduce){
     *{animation-duration:0.01ms !important; transition-duration:0.01ms !important;}
+  }
+  @media (max-width: 640px){
+    p{ white-space:normal; }
   }
 
   canvas#net{
@@ -49,30 +49,31 @@
   }
 
   .intro{
-    max-width:34rem;
+    max-width:48rem;
   }
 
   h1{
-    font-weight:500;
-    font-size:clamp(1.7rem, 3.4vw, 2.35rem);
-    letter-spacing:-0.01em;
-    margin:0 0 0.35em;
+    font-weight:700;
+    font-size:clamp(1.9rem, 3.8vw, 2.7rem);
+    letter-spacing:0.01em;
+    margin:0 0 0.3em;
     color:var(--ink);
   }
 
   .subtitle{
     font-size:0.95rem;
+    font-style:italic;
     color:var(--ink-soft);
-    margin:0 0 1.8em;
+    margin:0 0 1em;
   }
 
   p{
     font-weight:400;
-    font-size:1rem;
-    line-height:1.75;
+    font-size:1.05rem;
+    line-height:1.5;
     color:var(--ink-soft);
-    margin:0 0 0.9em;
-    max-width:32rem;
+    margin:0 0 0.3em;
+    white-space:nowrap;
   }
 
   p a{
@@ -84,7 +85,7 @@
   p a:hover{opacity:0.6;}
 
   .contact{
-    margin-top:2.6em;
+    margin-top:1.6em;
     display:flex;
     flex-wrap:wrap;
     gap:1.4em;
@@ -111,6 +112,108 @@
   }
 
   a:focus-visible{outline:1px solid var(--ink-soft); outline-offset:4px;}
+
+  /* Panel de control temporal — para ajustar el fondo 3D a gusto y
+     luego pasar la configuración final; no es parte del diseño. */
+  .panel{
+    position:fixed;
+    top:16px;
+    right:16px;
+    z-index:5;
+    width:300px;
+    max-height:calc(100vh - 32px);
+    overflow-y:auto;
+    background:rgba(10,11,14,0.94);
+    border:1px solid rgba(237,236,230,0.15);
+    border-radius:10px;
+    padding:14px;
+    font-family:system-ui, sans-serif;
+    font-size:12px;
+    color:var(--ink-soft);
+    backdrop-filter:blur(6px);
+  }
+  .panel.collapsed .panel-body,
+  .panel.collapsed .panel-actions,
+  .panel.collapsed .panel-json{ display:none; }
+  .panel-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    font-size:13px;
+    color:var(--ink);
+    margin-bottom:4px;
+  }
+  .panel-head button{
+    background:none;
+    border:1px solid rgba(237,236,230,0.25);
+    color:var(--ink);
+    width:22px;
+    height:22px;
+    border-radius:4px;
+    cursor:pointer;
+    line-height:1;
+  }
+  .panel-group-title{
+    margin:12px 0 4px;
+    color:var(--ink);
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:0.04em;
+    opacity:0.7;
+  }
+  .panel-row{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin:6px 0;
+  }
+  .panel-row label{
+    flex:1;
+    font-size:11px;
+  }
+  .panel-row input[type=range]{
+    flex:1.3;
+    accent-color:var(--ink);
+  }
+  .panel-row .val{
+    width:46px;
+    text-align:right;
+    font-variant-numeric:tabular-nums;
+    font-size:11px;
+    color:var(--ink);
+  }
+  .panel-row.checkbox{
+    justify-content:space-between;
+  }
+  .panel-actions{
+    display:flex;
+    gap:8px;
+    margin-top:10px;
+  }
+  .panel-actions button{
+    flex:1;
+    background:rgba(237,236,230,0.08);
+    border:1px solid rgba(237,236,230,0.2);
+    color:var(--ink);
+    padding:6px 8px;
+    border-radius:6px;
+    cursor:pointer;
+    font-size:11px;
+    font-family:inherit;
+  }
+  .panel-actions button:hover{ background:rgba(237,236,230,0.16); }
+  .panel-json{
+    width:100%;
+    margin-top:10px;
+    background:rgba(255,255,255,0.03);
+    border:1px solid rgba(237,236,230,0.12);
+    color:var(--ink-soft);
+    font-family:ui-monospace, 'SFMono-Regular', Consolas, monospace;
+    font-size:10px;
+    border-radius:6px;
+    padding:8px;
+    resize:vertical;
+  }
 </style>
 </head>
 <body>
@@ -147,6 +250,19 @@
   </div>
 </main>
 
+<div class="panel" id="panel">
+  <div class="panel-head">
+    <span>Panel de nodos</span>
+    <button type="button" id="panelToggle" aria-label="Colapsar panel">–</button>
+  </div>
+  <div class="panel-body" id="panelBody"></div>
+  <div class="panel-actions">
+    <button type="button" id="panelReset">Restablecer</button>
+    <button type="button" id="panelCopy">Copiar configuración</button>
+  </div>
+  <textarea class="panel-json" id="panelJson" rows="11" readonly></textarea>
+</div>
+
 <script>
 (function(){
   var canvas = document.getElementById('net');
@@ -164,24 +280,53 @@
   // perspectiva real (entre más lejos en z, más chico y más tenue) —
   // por eso el efecto de profundidad no depende de ningún truco visual,
   // es geometría.
-  // el volumen 3D se dimensiona en resize() en proporción al viewport,
-  // así la nube siempre llena la pantalla en vez de quedar como una
-  // esfera chica flotando en el centro
-  var HALF_X, HALF_Y, HALF_Z, CAM_DIST, FOCAL;
-
-  // estas cuatro se recalculan en resize() en proporción al tamaño del
-  // volumen 3D, para que la densidad de líneas y la velocidad se vean
-  // igual sin importar el tamaño de la ventana
-  var LINK_DIST, WANDER_FORCE, MAX_SPEED;
-  var DAMPING = 0.985;
-
-  var rot = { y: 0, x: 0 };     // ángulo actual de la cámara
-  var targetTiltX = 0, targetTiltY = 0;
-  var AUTOSPIN = 0.0009;        // giro constante, aun sin mouse
-
-  function nodeCount(){
+  //
+  // Todo lo ajustable vive en CONFIG y se controla desde el panel de la
+  // derecha mientras se afina el diseño; una vez elegidos los valores
+  // finales, este bloque de panel se puede borrar y dejar CONFIG fijo.
+  function defaultNodeCount(){
     var area = window.innerWidth * window.innerHeight;
     return Math.max(60, Math.min(130, Math.round(area / 12000)));
+  }
+
+  var CONFIG = {
+    nodeCount: defaultNodeCount(),
+    spread: 0.62,        // qué tan lejos del centro se reparten los nodos (fracción del viewport)
+    camDistFactor: 0.85, // distancia de la cámara al centro de la nube
+    focalFactor: 0.95,   // foco de la proyección — más alto, menos ojo de pez
+    linkDistFactor: 0.22,// distancia 3D máxima para dibujar línea entre nodos
+    wanderForce: 0.004,  // empuje continuo de la deriva propia de cada nodo
+    maxSpeed: 0.4,       // tope de velocidad de cada nodo
+    damping: 0.985,      // fricción — qué tan rápido se frena el movimiento
+    autospin: 0.0009,    // giro automático de la cámara, aun sin mouse
+    mouseYaw: 0.002,     // cuánto gira la cámara según la posición horizontal del cursor
+    mousePitch: 0.5,     // cuánto se inclina la cámara según la posición vertical del cursor
+    pitchSmooth: 0.04,   // suavizado del seguimiento de la inclinación
+    radiusMin: 1,        // radio mínimo de un nodo (antes de escalar por perspectiva)
+    radiusVar: 1.3,       // variación aleatoria de radio sobre el mínimo
+    alphaBase: 0.15,     // opacidad base de un nodo
+    alphaScale: 0.55,    // cuánto aumenta la opacidad un nodo cercano
+    linkOpacity: 0.22,   // opacidad máxima de una línea
+    colorAccents: true   // si hay líneas/nodos con acentos de color, además del blanco
+  };
+  var DEFAULTS = JSON.parse(JSON.stringify(CONFIG));
+
+  // el volumen 3D y varias constantes derivadas se recalculan cada vez
+  // que cambia el viewport o un control del panel — así todo reacciona
+  // al instante en vez de esperar a un resize()
+  var HALF_X, HALF_Y, HALF_Z, CAM_DIST, FOCAL, LINK_DIST;
+
+  var rot = { y: 0, x: 0 };
+  var targetTiltX = 0, targetTiltY = 0;
+
+  function applyDerived(){
+    var minDim = Math.min(W, H);
+    HALF_X = W * CONFIG.spread;
+    HALF_Y = H * CONFIG.spread;
+    HALF_Z = minDim * CONFIG.spread;
+    CAM_DIST = minDim * CONFIG.camDistFactor;
+    FOCAL = minDim * CONFIG.focalFactor;
+    LINK_DIST = minDim * CONFIG.linkDistFactor;
   }
 
   function resize(){
@@ -193,22 +338,12 @@
     canvas.style.width = W + 'px';
     canvas.style.height = H + 'px';
     ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-
-    var minDim = Math.min(W, H);
-    HALF_X = W * 0.62;
-    HALF_Y = H * 0.62;
-    HALF_Z = minDim * 0.62;
-    CAM_DIST = minDim * 0.85;
-    FOCAL = minDim * 0.95;
-    LINK_DIST = minDim * 0.22;
-    WANDER_FORCE = minDim * 0.0000045;
-    MAX_SPEED = minDim * 0.00045;
+    applyDerived();
   }
 
   function makeNodes(){
-    var n = nodeCount();
     nodes = [];
-    for (var i = 0; i < n; i++){
+    for (var i = 0; i < CONFIG.nodeCount; i++){
       nodes.push({
         x: (Math.random() * 2 - 1) * HALF_X,
         y: (Math.random() * 2 - 1) * HALF_Y,
@@ -216,7 +351,7 @@
         vx: 0, vy: 0, vz: 0,
         angle: Math.random() * Math.PI * 2,
         axis: Math.random() * Math.PI * 2,
-        r: 1 + Math.random() * 1.3
+        r: CONFIG.radiusMin + Math.random() * CONFIG.radiusVar
       });
     }
   }
@@ -234,8 +369,8 @@
   function step(){
     ctx.clearRect(0, 0, W, H);
 
-    rot.y += AUTOSPIN + targetTiltY * 0.002; // giro constante + leve empujón del cursor
-    rot.x += (targetTiltX - rot.x) * 0.04;   // inclinación (pitch) sigue al cursor con suavizado
+    rot.y += CONFIG.autospin + targetTiltY * CONFIG.mouseYaw;
+    rot.x += (targetTiltX - rot.x) * CONFIG.pitchSmooth;
 
     var cosY = Math.cos(rot.y), sinY = Math.sin(rot.y);
     var cosX = Math.cos(rot.x), sinX = Math.sin(rot.x);
@@ -245,14 +380,14 @@
       var a = nodes[i];
       a.angle += (Math.random() - 0.5) * 0.03;
       a.axis += (Math.random() - 0.5) * 0.03;
-      a.vx += Math.cos(a.angle) * Math.cos(a.axis) * WANDER_FORCE;
-      a.vy += Math.sin(a.axis) * WANDER_FORCE;
-      a.vz += Math.sin(a.angle) * Math.cos(a.axis) * WANDER_FORCE;
+      a.vx += Math.cos(a.angle) * Math.cos(a.axis) * CONFIG.wanderForce;
+      a.vy += Math.sin(a.axis) * CONFIG.wanderForce;
+      a.vz += Math.sin(a.angle) * Math.cos(a.axis) * CONFIG.wanderForce;
 
-      a.vx *= DAMPING; a.vy *= DAMPING; a.vz *= DAMPING;
+      a.vx *= CONFIG.damping; a.vy *= CONFIG.damping; a.vz *= CONFIG.damping;
       var speed = Math.sqrt(a.vx * a.vx + a.vy * a.vy + a.vz * a.vz);
-      if (speed > MAX_SPEED){
-        var k = MAX_SPEED / speed;
+      if (speed > CONFIG.maxSpeed){
+        var k = CONFIG.maxSpeed / speed;
         a.vx *= k; a.vy *= k; a.vz *= k;
       }
 
@@ -288,9 +423,13 @@
         if (dist > LINK_DIST) continue;
 
         var opScale = (a.sc + b.sc) * 0.5;
-        var op = (1 - dist / LINK_DIST) * 0.22 * Math.min(1, opScale * 0.9);
-        var key = (i * 7 + j * 13) % 10;
-        var rgb = key < 8 ? '237,236,230' : (key === 8 ? '138,164,214' : '196,150,120');
+        var op = (1 - dist / LINK_DIST) * CONFIG.linkOpacity * Math.min(1, opScale * 0.9);
+        var rgb = '237,236,230';
+        if (CONFIG.colorAccents){
+          var key = (i * 7 + j * 13) % 10;
+          if (key === 8) rgb = '138,164,214';
+          else if (key === 9) rgb = '196,150,120';
+        }
         ctx.strokeStyle = 'rgba(' + rgb + ',' + Math.max(0, op).toFixed(3) + ')';
         ctx.beginPath();
         ctx.moveTo(a.sx, a.sy);
@@ -304,7 +443,7 @@
     var ordered = nodes.slice().sort(function(p, q){ return p.rz - q.rz; });
     for (var i = 0; i < ordered.length; i++){
       var a = ordered[i];
-      var alpha = Math.max(0.08, Math.min(0.85, 0.15 + a.sc * 0.55));
+      var alpha = Math.max(0.08, Math.min(0.85, CONFIG.alphaBase + a.sc * CONFIG.alphaScale));
       var radius = Math.max(0.4, a.r * a.sc);
       ctx.fillStyle = 'rgba(237,236,230,' + alpha.toFixed(3) + ')';
       ctx.beginPath();
@@ -319,7 +458,7 @@
     mouse.x = e.clientX;
     mouse.y = e.clientY;
     mouse.active = true;
-    targetTiltX = (e.clientY / H - 0.5) * 0.5;
+    targetTiltX = (e.clientY / H - 0.5) * CONFIG.mousePitch;
     targetTiltY = (e.clientX / W - 0.5);
   });
   window.addEventListener('mouseleave', function(){
@@ -337,6 +476,142 @@
   resize();
   makeNodes();
   step();
+
+  // ---- panel de control ----------------------------------------------
+  var SCHEMA = [
+    { title: 'Nodos', controls: [
+      { key: 'nodeCount', label: 'Cantidad', min: 10, max: 400, step: 1, remake: true },
+      { key: 'radiusMin', label: 'Radio base', min: 0.3, max: 3, step: 0.1, remake: true },
+      { key: 'radiusVar', label: 'Variación de radio', min: 0, max: 3, step: 0.1, remake: true }
+    ]},
+    { title: 'Espacio 3D', controls: [
+      { key: 'spread', label: 'Extensión del volumen', min: 0.2, max: 1.1, step: 0.02 },
+      { key: 'camDistFactor', label: 'Distancia de cámara', min: 0.3, max: 2, step: 0.02 },
+      { key: 'focalFactor', label: 'Foco (perspectiva)', min: 0.3, max: 2, step: 0.02 }
+    ]},
+    { title: 'Movimiento', controls: [
+      { key: 'wanderForce', label: 'Fuerza de deriva', min: 0.0005, max: 0.02, step: 0.0005 },
+      { key: 'maxSpeed', label: 'Velocidad máxima', min: 0.05, max: 1.5, step: 0.01 },
+      { key: 'damping', label: 'Fricción', min: 0.9, max: 0.999, step: 0.001 },
+      { key: 'autospin', label: 'Giro automático', min: 0, max: 0.005, step: 0.0001 },
+      { key: 'mouseYaw', label: 'Cursor → giro', min: 0, max: 0.01, step: 0.0002 },
+      { key: 'mousePitch', label: 'Cursor → inclinación', min: 0, max: 1.5, step: 0.02 },
+      { key: 'pitchSmooth', label: 'Suavizado de inclinación', min: 0.01, max: 0.3, step: 0.01 }
+    ]},
+    { title: 'Líneas y color', controls: [
+      { key: 'linkDistFactor', label: 'Distancia de enlace', min: 0.05, max: 0.5, step: 0.01 },
+      { key: 'linkOpacity', label: 'Opacidad de líneas', min: 0, max: 0.6, step: 0.01 },
+      { key: 'alphaBase', label: 'Opacidad base de nodos', min: 0, max: 0.5, step: 0.01 },
+      { key: 'alphaScale', label: 'Opacidad por profundidad', min: 0, max: 1.2, step: 0.02 }
+    ]}
+  ];
+
+  function decimalsFor(step){
+    var s = String(step);
+    var i = s.indexOf('.');
+    return i === -1 ? 0 : s.length - i - 1;
+  }
+
+  var panel = document.getElementById('panel');
+  var panelBody = document.getElementById('panelBody');
+  var jsonBox = document.getElementById('panelJson');
+  var controlRefs = [];
+
+  function updateJson(){
+    jsonBox.value = JSON.stringify(CONFIG, null, 2);
+  }
+
+  function onControlChange(ctrl){
+    applyDerived();
+    if (ctrl && ctrl.remake) makeNodes();
+    updateJson();
+    if (reduceMotion) step();
+  }
+
+  SCHEMA.forEach(function(group){
+    var title = document.createElement('div');
+    title.className = 'panel-group-title';
+    title.textContent = group.title;
+    panelBody.appendChild(title);
+
+    group.controls.forEach(function(ctrl){
+      var row = document.createElement('div');
+      row.className = 'panel-row';
+
+      var label = document.createElement('label');
+      label.textContent = ctrl.label;
+      label.htmlFor = 'ctrl-' + ctrl.key;
+
+      var input = document.createElement('input');
+      input.type = 'range';
+      input.id = 'ctrl-' + ctrl.key;
+      input.min = ctrl.min; input.max = ctrl.max; input.step = ctrl.step;
+      input.value = CONFIG[ctrl.key];
+
+      var val = document.createElement('span');
+      val.className = 'val';
+      val.textContent = Number(CONFIG[ctrl.key]).toFixed(decimalsFor(ctrl.step));
+
+      input.addEventListener('input', function(){
+        CONFIG[ctrl.key] = parseFloat(input.value);
+        val.textContent = Number(CONFIG[ctrl.key]).toFixed(decimalsFor(ctrl.step));
+        onControlChange(ctrl);
+      });
+
+      row.appendChild(label); row.appendChild(input); row.appendChild(val);
+      panelBody.appendChild(row);
+      controlRefs.push({ ctrl: ctrl, input: input, val: val });
+    });
+  });
+
+  var accentRow = document.createElement('div');
+  accentRow.className = 'panel-row checkbox';
+  var accentLabel = document.createElement('label');
+  accentLabel.textContent = 'Acentos de color';
+  accentLabel.htmlFor = 'ctrl-colorAccents';
+  var accentInput = document.createElement('input');
+  accentInput.type = 'checkbox';
+  accentInput.id = 'ctrl-colorAccents';
+  accentInput.checked = CONFIG.colorAccents;
+  accentInput.addEventListener('change', function(){
+    CONFIG.colorAccents = accentInput.checked;
+    updateJson();
+    if (reduceMotion) step();
+  });
+  accentRow.appendChild(accentLabel);
+  accentRow.appendChild(accentInput);
+  panelBody.appendChild(accentRow);
+
+  updateJson();
+
+  document.getElementById('panelToggle').addEventListener('click', function(){
+    panel.classList.toggle('collapsed');
+    this.textContent = panel.classList.contains('collapsed') ? '+' : '–';
+  });
+
+  document.getElementById('panelReset').addEventListener('click', function(){
+    Object.keys(DEFAULTS).forEach(function(k){ CONFIG[k] = DEFAULTS[k]; });
+    controlRefs.forEach(function(ref){
+      ref.input.value = CONFIG[ref.ctrl.key];
+      ref.val.textContent = Number(CONFIG[ref.ctrl.key]).toFixed(decimalsFor(ref.ctrl.step));
+    });
+    accentInput.checked = CONFIG.colorAccents;
+    resize();
+    makeNodes();
+    updateJson();
+    if (reduceMotion) step();
+  });
+
+  document.getElementById('panelCopy').addEventListener('click', function(){
+    var btn = this;
+    jsonBox.select();
+    if (navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(jsonBox.value).then(function(){
+        btn.textContent = 'Copiado ✓';
+        setTimeout(function(){ btn.textContent = 'Copiar configuración'; }, 1500);
+      }, function(){ /* selección manual ya quedó lista */ });
+    }
+  });
 })();
 </script>
 
