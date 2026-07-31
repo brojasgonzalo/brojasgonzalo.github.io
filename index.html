@@ -112,108 +112,6 @@
   }
 
   a:focus-visible{outline:1px solid var(--ink-soft); outline-offset:4px;}
-
-  /* Panel de control temporal — para ajustar el fondo 3D a gusto y
-     luego pasar la configuración final; no es parte del diseño. */
-  .panel{
-    position:fixed;
-    top:16px;
-    right:16px;
-    z-index:5;
-    width:300px;
-    max-height:calc(100vh - 32px);
-    overflow-y:auto;
-    background:rgba(10,11,14,0.94);
-    border:1px solid rgba(237,236,230,0.15);
-    border-radius:10px;
-    padding:14px;
-    font-family:system-ui, sans-serif;
-    font-size:12px;
-    color:var(--ink-soft);
-    backdrop-filter:blur(6px);
-  }
-  .panel.collapsed .panel-body,
-  .panel.collapsed .panel-actions,
-  .panel.collapsed .panel-json{ display:none; }
-  .panel-head{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    font-size:13px;
-    color:var(--ink);
-    margin-bottom:4px;
-  }
-  .panel-head button{
-    background:none;
-    border:1px solid rgba(237,236,230,0.25);
-    color:var(--ink);
-    width:22px;
-    height:22px;
-    border-radius:4px;
-    cursor:pointer;
-    line-height:1;
-  }
-  .panel-group-title{
-    margin:12px 0 4px;
-    color:var(--ink);
-    font-size:11px;
-    text-transform:uppercase;
-    letter-spacing:0.04em;
-    opacity:0.7;
-  }
-  .panel-row{
-    display:flex;
-    align-items:center;
-    gap:8px;
-    margin:6px 0;
-  }
-  .panel-row label{
-    flex:1;
-    font-size:11px;
-  }
-  .panel-row input[type=range]{
-    flex:1.3;
-    accent-color:var(--ink);
-  }
-  .panel-row .val{
-    width:46px;
-    text-align:right;
-    font-variant-numeric:tabular-nums;
-    font-size:11px;
-    color:var(--ink);
-  }
-  .panel-row.checkbox{
-    justify-content:space-between;
-  }
-  .panel-actions{
-    display:flex;
-    gap:8px;
-    margin-top:10px;
-  }
-  .panel-actions button{
-    flex:1;
-    background:rgba(237,236,230,0.08);
-    border:1px solid rgba(237,236,230,0.2);
-    color:var(--ink);
-    padding:6px 8px;
-    border-radius:6px;
-    cursor:pointer;
-    font-size:11px;
-    font-family:inherit;
-  }
-  .panel-actions button:hover{ background:rgba(237,236,230,0.16); }
-  .panel-json{
-    width:100%;
-    margin-top:10px;
-    background:rgba(255,255,255,0.03);
-    border:1px solid rgba(237,236,230,0.12);
-    color:var(--ink-soft);
-    font-family:ui-monospace, 'SFMono-Regular', Consolas, monospace;
-    font-size:10px;
-    border-radius:6px;
-    padding:8px;
-    resize:vertical;
-  }
 </style>
 </head>
 <body>
@@ -250,19 +148,6 @@
   </div>
 </main>
 
-<div class="panel" id="panel">
-  <div class="panel-head">
-    <span>Panel de nodos</span>
-    <button type="button" id="panelToggle" aria-label="Colapsar panel">–</button>
-  </div>
-  <div class="panel-body" id="panelBody"></div>
-  <div class="panel-actions">
-    <button type="button" id="panelReset">Restablecer</button>
-    <button type="button" id="panelCopy">Copiar configuración</button>
-  </div>
-  <textarea class="panel-json" id="panelJson" rows="11" readonly></textarea>
-</div>
-
 <script>
 (function(){
   var canvas = document.getElementById('net');
@@ -277,65 +162,48 @@
   // Nube de puntos en un espacio 3D real (no simulado): cada nodo tiene
   // x, y, z en unidades de "mundo" independientes de los píxeles de
   // pantalla, y se proyecta cada frame con perspectiva real. Encima de
-  // esa base hay una serie de capas independientes y todas apagables:
-  // modo 3D on/off, dirección del movimiento (corrientes + remolino),
-  // efectos de agua y brillo, y una lectura tipo HUD cuando el cursor
-  // pasa cerca de un nodo.
-  //
-  // Todo lo ajustable vive en CONFIG y se controla desde el panel de la
-  // derecha mientras se afina el diseño; una vez elegidos los valores
-  // finales, este bloque de panel se puede borrar y dejar CONFIG fijo.
-  function defaultNodeCount(){
-    var area = window.innerWidth * window.innerHeight;
-    return Math.max(60, Math.min(130, Math.round(area / 12000)));
-  }
-
+  // esa base hay varias capas independientes: dirección del movimiento
+  // (corrientes + remolino), acentos de color, brillo y una lectura tipo
+  // HUD cuando el cursor pasa cerca de un nodo. Estos valores quedaron
+  // fijos después de afinarlos a mano con un panel de control temporal
+  // (3D desactivado a propósito: campo plano con brillo y HUD).
   var CONFIG = {
-    nodeCount: defaultNodeCount(),
-    radiusMin: 1,          // radio mínimo de un nodo (antes de escalar por perspectiva)
-    radiusVar: 1.3,        // variación aleatoria de radio sobre el mínimo
-
-    enable3D: true,        // si está apagado: sin rotación ni perspectiva, campo plano
-    spread: 0.62,          // qué tan lejos del centro se reparten los nodos (fracción del viewport)
-    camDistFactor: 0.85,   // distancia de la cámara al centro de la nube
-    focalFactor: 0.95,     // foco de la proyección — más alto, menos ojo de pez
-
-    wanderForce: 0.004,    // empuje continuo de la deriva propia de cada nodo
-    maxSpeed: 0.4,         // tope de velocidad de cada nodo
-    damping: 0.985,        // fricción — qué tan rápido se frena el movimiento
-    autospin: 0.0009,      // giro automático de la cámara, aun sin mouse
-    mouseYaw: 0.002,       // cuánto gira la cámara según la posición horizontal del cursor
-    mousePitch: 0.5,       // cuánto se inclina la cámara según la posición vertical del cursor
-    pitchSmooth: 0.04,     // suavizado del seguimiento de la inclinación
-
-    lockZ: false,          // congela la profundidad de cada nodo (solo se mueve en el plano XY)
-    driftX: 0,             // corriente constante en X — un valor fijo empuja todo el campo hacia un lado
-    driftY: 0,             // corriente constante en Y
-    driftZ: 0,             // corriente constante en Z
-    orbitStrength: 0,      // remolino: rotación constante alrededor del eje Y (vórtice)
-
-    colorAccents: true,    // si hay líneas/nodos con acentos de color, además del blanco
-    linkDistFactor: 0.22,  // distancia 3D máxima para dibujar línea entre nodos
-    linkOpacity: 0.22,     // opacidad máxima de una línea
-    alphaBase: 0.15,       // opacidad base de un nodo
-    alphaScale: 0.55,      // cuánto aumenta la opacidad un nodo cercano
-
-    waterEffect: false,    // oleaje: cada nodo se mece con su propio vaivén sinusoidal
-    waterAmplitude: 6,     // qué tan grande es el vaivén, en píxeles
-    waterSpeed: 0.0015,    // qué tan rápido oscila
-
-    glowEffect: false,     // halo de brillo alrededor de cada nodo
-    glowAmount: 12,        // radio del halo, en píxeles
-
-    hudEffect: false,      // lectura tipo HUD: al pasar el cursor cerca, marca distancias
-    hudRadius: 160,        // radio de detección alrededor del cursor, en píxeles
-    hudMax: 6              // máximo de nodos etiquetados a la vez
+    nodeCount: 130,
+    radiusMin: 1,
+    radiusVar: 1.1,
+    enable3D: false,
+    spread: 0.62,
+    camDistFactor: 1.06,
+    focalFactor: 0.95,
+    wanderForce: 0.004,
+    maxSpeed: 0.4,
+    damping: 0.985,
+    autospin: 0.0009,
+    mouseYaw: 0.002,
+    mousePitch: 0.5,
+    pitchSmooth: 0.04,
+    lockZ: true,
+    driftX: 0.001,
+    driftY: 0,
+    driftZ: -0.009,
+    orbitStrength: 0.001,
+    colorAccents: true,
+    linkDistFactor: 0.5,
+    linkOpacity: 0.22,
+    alphaBase: 0.15,
+    alphaScale: 0.55,
+    waterEffect: false,
+    waterAmplitude: 15,
+    waterSpeed: 0.0015,
+    glowEffect: true,
+    glowAmount: 24,
+    hudEffect: true,
+    hudRadius: 280,
+    hudMax: 5
   };
-  var DEFAULTS = JSON.parse(JSON.stringify(CONFIG));
 
-  // el volumen 3D y varias constantes derivadas se recalculan cada vez
-  // que cambia el viewport o un control del panel — así todo reacciona
-  // al instante en vez de esperar a un resize()
+  // el volumen 3D y varias constantes derivadas se recalculan en cada
+  // resize()
   var HALF_X, HALF_Y, HALF_Z, CAM_DIST, FOCAL, LINK_DIST;
 
   var rot = { y: 0, x: 0 };
@@ -576,160 +444,6 @@
   resize();
   makeNodes();
   step();
-
-  // ---- panel de control ----------------------------------------------
-  var SCHEMA = [
-    { title: 'Nodos', controls: [
-      { key: 'nodeCount', type: 'range', label: 'Cantidad', min: 10, max: 400, step: 1, remake: true },
-      { key: 'radiusMin', type: 'range', label: 'Radio base', min: 0.3, max: 3, step: 0.1, remake: true },
-      { key: 'radiusVar', type: 'range', label: 'Variación de radio', min: 0, max: 3, step: 0.1, remake: true }
-    ]},
-    { title: 'Espacio 3D', controls: [
-      { key: 'enable3D', type: 'checkbox', label: 'Modo 3D activo' },
-      { key: 'spread', type: 'range', label: 'Extensión del volumen', min: 0.2, max: 1.1, step: 0.02 },
-      { key: 'camDistFactor', type: 'range', label: 'Distancia de cámara', min: 0.3, max: 2, step: 0.02 },
-      { key: 'focalFactor', type: 'range', label: 'Foco (perspectiva)', min: 0.3, max: 2, step: 0.02 }
-    ]},
-    { title: 'Movimiento', controls: [
-      { key: 'wanderForce', type: 'range', label: 'Fuerza de deriva', min: 0.0005, max: 0.02, step: 0.0005 },
-      { key: 'maxSpeed', type: 'range', label: 'Velocidad máxima', min: 0.05, max: 1.5, step: 0.01 },
-      { key: 'damping', type: 'range', label: 'Fricción', min: 0.9, max: 0.999, step: 0.001 },
-      { key: 'autospin', type: 'range', label: 'Giro automático', min: 0, max: 0.005, step: 0.0001 },
-      { key: 'mouseYaw', type: 'range', label: 'Cursor → giro', min: 0, max: 0.01, step: 0.0002 },
-      { key: 'mousePitch', type: 'range', label: 'Cursor → inclinación', min: 0, max: 1.5, step: 0.02 },
-      { key: 'pitchSmooth', type: 'range', label: 'Suavizado de inclinación', min: 0.01, max: 0.3, step: 0.01 }
-    ]},
-    { title: 'Dirección', controls: [
-      { key: 'lockZ', type: 'checkbox', label: 'Bloquear profundidad (Z)' },
-      { key: 'driftX', type: 'range', label: 'Corriente en X', min: -0.02, max: 0.02, step: 0.001 },
-      { key: 'driftY', type: 'range', label: 'Corriente en Y', min: -0.02, max: 0.02, step: 0.001 },
-      { key: 'driftZ', type: 'range', label: 'Corriente en Z', min: -0.02, max: 0.02, step: 0.001 },
-      { key: 'orbitStrength', type: 'range', label: 'Remolino (órbita)', min: -0.02, max: 0.02, step: 0.001 }
-    ]},
-    { title: 'Líneas y color', controls: [
-      { key: 'colorAccents', type: 'checkbox', label: 'Acentos de color' },
-      { key: 'linkDistFactor', type: 'range', label: 'Distancia de enlace', min: 0.05, max: 0.5, step: 0.01 },
-      { key: 'linkOpacity', type: 'range', label: 'Opacidad de líneas', min: 0, max: 0.6, step: 0.01 },
-      { key: 'alphaBase', type: 'range', label: 'Opacidad base de nodos', min: 0, max: 0.5, step: 0.01 },
-      { key: 'alphaScale', type: 'range', label: 'Opacidad por profundidad', min: 0, max: 1.2, step: 0.02 }
-    ]},
-    { title: 'Efectos', controls: [
-      { key: 'waterEffect', type: 'checkbox', label: 'Agua' },
-      { key: 'waterAmplitude', type: 'range', label: 'Amplitud del oleaje', min: 0, max: 30, step: 1 },
-      { key: 'waterSpeed', type: 'range', label: 'Velocidad del oleaje', min: 0.0002, max: 0.01, step: 0.0002 },
-      { key: 'glowEffect', type: 'checkbox', label: 'Brillo' },
-      { key: 'glowAmount', type: 'range', label: 'Intensidad del brillo', min: 0, max: 40, step: 1 },
-      { key: 'hudEffect', type: 'checkbox', label: 'Lectura cibernética (cursor)' },
-      { key: 'hudRadius', type: 'range', label: 'Radio de detección', min: 40, max: 400, step: 10 },
-      { key: 'hudMax', type: 'range', label: 'Máx. nodos etiquetados', min: 1, max: 15, step: 1 }
-    ]}
-  ];
-
-  function decimalsFor(step){
-    var s = String(step);
-    var i = s.indexOf('.');
-    return i === -1 ? 0 : s.length - i - 1;
-  }
-
-  var panel = document.getElementById('panel');
-  var panelBody = document.getElementById('panelBody');
-  var jsonBox = document.getElementById('panelJson');
-  var controlRefs = [];
-
-  function updateJson(){
-    jsonBox.value = JSON.stringify(CONFIG, null, 2);
-  }
-
-  function onControlChange(ctrl){
-    applyDerived();
-    if (ctrl && ctrl.remake) makeNodes();
-    updateJson();
-    if (reduceMotion) step();
-  }
-
-  SCHEMA.forEach(function(group){
-    var title = document.createElement('div');
-    title.className = 'panel-group-title';
-    title.textContent = group.title;
-    panelBody.appendChild(title);
-
-    group.controls.forEach(function(ctrl){
-      var row = document.createElement('div');
-      row.className = 'panel-row' + (ctrl.type === 'checkbox' ? ' checkbox' : '');
-
-      var label = document.createElement('label');
-      label.textContent = ctrl.label;
-      label.htmlFor = 'ctrl-' + ctrl.key;
-      row.appendChild(label);
-
-      var input = document.createElement('input');
-      input.id = 'ctrl-' + ctrl.key;
-
-      if (ctrl.type === 'checkbox'){
-        input.type = 'checkbox';
-        input.checked = CONFIG[ctrl.key];
-        input.addEventListener('change', function(){
-          CONFIG[ctrl.key] = input.checked;
-          onControlChange(ctrl);
-        });
-        row.appendChild(input);
-        controlRefs.push({ ctrl: ctrl, input: input });
-      } else {
-        input.type = 'range';
-        input.min = ctrl.min; input.max = ctrl.max; input.step = ctrl.step;
-        input.value = CONFIG[ctrl.key];
-
-        var val = document.createElement('span');
-        val.className = 'val';
-        val.textContent = Number(CONFIG[ctrl.key]).toFixed(decimalsFor(ctrl.step));
-
-        input.addEventListener('input', function(){
-          CONFIG[ctrl.key] = parseFloat(input.value);
-          val.textContent = Number(CONFIG[ctrl.key]).toFixed(decimalsFor(ctrl.step));
-          onControlChange(ctrl);
-        });
-
-        row.appendChild(input); row.appendChild(val);
-        controlRefs.push({ ctrl: ctrl, input: input, val: val });
-      }
-
-      panelBody.appendChild(row);
-    });
-  });
-
-  updateJson();
-
-  document.getElementById('panelToggle').addEventListener('click', function(){
-    panel.classList.toggle('collapsed');
-    this.textContent = panel.classList.contains('collapsed') ? '+' : '–';
-  });
-
-  document.getElementById('panelReset').addEventListener('click', function(){
-    Object.keys(DEFAULTS).forEach(function(k){ CONFIG[k] = DEFAULTS[k]; });
-    controlRefs.forEach(function(ref){
-      if (ref.ctrl.type === 'checkbox'){
-        ref.input.checked = CONFIG[ref.ctrl.key];
-      } else {
-        ref.input.value = CONFIG[ref.ctrl.key];
-        ref.val.textContent = Number(CONFIG[ref.ctrl.key]).toFixed(decimalsFor(ref.ctrl.step));
-      }
-    });
-    resize();
-    makeNodes();
-    updateJson();
-    if (reduceMotion) step();
-  });
-
-  document.getElementById('panelCopy').addEventListener('click', function(){
-    var btn = this;
-    jsonBox.select();
-    if (navigator.clipboard && navigator.clipboard.writeText){
-      navigator.clipboard.writeText(jsonBox.value).then(function(){
-        btn.textContent = 'Copiado ✓';
-        setTimeout(function(){ btn.textContent = 'Copiar configuración'; }, 1500);
-      }, function(){ /* selección manual ya quedó lista */ });
-    }
-  });
 })();
 </script>
 
