@@ -56,8 +56,14 @@
     font-weight:500;
     font-size:clamp(1.7rem, 3.4vw, 2.35rem);
     letter-spacing:-0.01em;
-    margin:0 0 1.6em;
+    margin:0 0 0.35em;
     color:var(--ink);
+  }
+
+  .subtitle{
+    font-size:0.95rem;
+    color:var(--ink-soft);
+    margin:0 0 1.8em;
   }
 
   p{
@@ -105,8 +111,10 @@
 
 <main>
   <div class="intro">
-    <h1>Gonzalo, 29</h1>
+    <h1>Gonzalo Bustamante Rojas</h1>
+    <p class="subtitle">29, Santiago de Chile.</p>
     <p>Investigador asociado al <a href="https://encuestas.uc.cl/">Centro de Encuestas y Estudios Longitudinales UC</a>.</p>
+    <p>Profesor honorario Universidad Finis Terrae.</p>
     <p>Cientista Familiar (UFT) y Magíster en Sociología (PUC).</p>
     <p>Me gustan los gatos y el shoegaze.</p>
 
@@ -136,7 +144,7 @@
 
   function nodeCount(){
     var area = window.innerWidth * window.innerHeight;
-    return Math.max(40, Math.min(110, Math.round(area / 16000)));
+    return Math.max(150, Math.min(320, Math.round(area / 6500)));
   }
 
   function resize(){
