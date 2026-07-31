@@ -157,20 +157,21 @@
   var nodes = [];
   var mouse = { x: -9999, y: -9999, active: false };
 
-  // Modelo tipo átomos: cada par de nodos dentro de INTERACT_RADIUS se
-  // atrae a media distancia y se repele si se acerca más que EQUILIBRIUM
-  // — igual que un potencial de enlace simplificado. Eso hace que se
-  // formen cúmulos sueltos que se arman y deshacen solos.
-  var INTERACT_RADIUS = 140;  // más allá de esto, dos nodos no se sienten
-  var EQUILIBRIUM = 46;       // "distancia de enlace" cómoda
-  var REPEL_FORCE = 0.026;    // empuje cuando están muy cerca
-  var ATTRACT_FORCE = 0.0032; // atracción a media distancia (bastante más débil)
-  var DAMPING = 0.968;        // menos fricción — el movimiento dura más
-  var MAX_SPEED = 1.0;        // tope de velocidad más alto, más movimiento visible
-  var JITTER = 0.026;         // agitación térmica más notoria
+  // Enjambre disperso, no átomos: cada nodo trae su propio movimiento de
+  // base (dirección aleatoria fija), y solo se repelen entre sí a muy
+  // corta distancia para no encimarse — sin atracción, así que no se
+  // arman cúmulos estables. Las líneas se dibujan cuando dos nodos pasan
+  // cerca por casualidad, no porque estén "enlazados".
+  var REPEL_RADIUS_NODE = 60;  // distancia a la que dos nodos se repelen
+  var REPEL_FORCE = 0.03;      // empuje al repelerse
+  var LINK_DIST = 120;         // distancia para dibujar línea entre nodos
+  var DAMPING = 0.985;         // fricción baja — el movimiento de base persiste
+  var MAX_SPEED = 1.5;         // tope de velocidad, harto más alto que antes
+  var JITTER = 0.018;          // variación aleatoria sobre el movimiento de base
+  var BASE_SPEED = 0.35;       // velocidad propia de cada nodo, constante
 
-  var REPEL_RADIUS = 130;     // radio de perturbación del cursor
-  var REPEL_STRENGTH = 0.9;   // impulso del cursor (empuja, no atrae)
+  var REPEL_RADIUS = 130;      // radio de perturbación del cursor
+  var REPEL_STRENGTH = 0.9;    // impulso del cursor (empuja, no atrae)
 
   function nodeCount(){
     var area = window.innerWidth * window.innerHeight;
@@ -192,11 +193,12 @@
     var n = nodeCount();
     nodes = [];
     for (var i = 0; i < n; i++){
+      var angle = Math.random() * Math.PI * 2;
       nodes.push({
         x: Math.random() * W,
         y: Math.random() * H,
-        vx: 0,
-        vy: 0,
+        vx: Math.cos(angle) * BASE_SPEED,
+        vy: Math.sin(angle) * BASE_SPEED,
         r: 1 + Math.random() * 1.2
       });
     }
@@ -215,31 +217,25 @@
         var b = nodes[j];
         var dx = b.x - a.x, dy = b.y - a.y;
         var dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < 0.001 || dist > INTERACT_RADIUS) continue;
+        if (dist < 0.001 || dist > LINK_DIST) continue;
 
-        var nx = dx / dist, ny = dy / dist;
-        var f;
-        if (dist < EQUILIBRIUM){
-          // demasiado cerca: repele
-          f = -((EQUILIBRIUM - dist) / EQUILIBRIUM) * REPEL_FORCE;
-        } else {
-          // rango medio: atrae, con caída suave hacia el borde del radio
-          var t = (dist - EQUILIBRIUM) / (INTERACT_RADIUS - EQUILIBRIUM);
-          f = Math.sin(t * Math.PI) * ATTRACT_FORCE;
+        // solo repulsión, y solo a muy corta distancia — sin atracción
+        // no hay nada que arme cúmulos estables
+        if (dist < REPEL_RADIUS_NODE){
+          var nx = dx / dist, ny = dy / dist;
+          var f = -((REPEL_RADIUS_NODE - dist) / REPEL_RADIUS_NODE) * REPEL_FORCE;
+          a.vx += nx * f; a.vy += ny * f;
+          b.vx -= nx * f; b.vy -= ny * f;
         }
-        a.vx += nx * f; a.vy += ny * f;
-        b.vx -= nx * f; b.vy -= ny * f;
 
-        if (dist < EQUILIBRIUM * 2.6){
-          var op = (1 - dist / (EQUILIBRIUM * 2.6)) * 0.18;
-          var key = (i * 7 + j * 13) % 10;
-          var rgb = key < 8 ? '237,236,230' : (key === 8 ? '138,164,214' : '196,150,120');
-          ctx.strokeStyle = 'rgba(' + rgb + ',' + op.toFixed(3) + ')';
-          ctx.beginPath();
-          ctx.moveTo(a.x, a.y);
-          ctx.lineTo(b.x, b.y);
-          ctx.stroke();
-        }
+        var op = (1 - dist / LINK_DIST) * 0.16;
+        var key = (i * 7 + j * 13) % 10;
+        var rgb = key < 8 ? '237,236,230' : (key === 8 ? '138,164,214' : '196,150,120');
+        ctx.strokeStyle = 'rgba(' + rgb + ',' + op.toFixed(3) + ')';
+        ctx.beginPath();
+        ctx.moveTo(a.x, a.y);
+        ctx.lineTo(b.x, b.y);
+        ctx.stroke();
       }
     }
 
