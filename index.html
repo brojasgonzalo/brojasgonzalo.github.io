@@ -163,11 +163,11 @@
   // formen cúmulos sueltos que se arman y deshacen solos.
   var INTERACT_RADIUS = 140;  // más allá de esto, dos nodos no se sienten
   var EQUILIBRIUM = 46;       // "distancia de enlace" cómoda
-  var REPEL_FORCE = 0.022;    // empuje cuando están muy cerca
-  var ATTRACT_FORCE = 0.007;  // atracción a media distancia (más suave)
-  var DAMPING = 0.955;        // fricción — sin esto, no se estabiliza nunca
-  var MAX_SPEED = 0.55;       // tope de velocidad, para que se vea elegante
-  var JITTER = 0.012;         // agitación térmica leve, para que nunca se congele
+  var REPEL_FORCE = 0.026;    // empuje cuando están muy cerca
+  var ATTRACT_FORCE = 0.0032; // atracción a media distancia (bastante más débil)
+  var DAMPING = 0.968;        // menos fricción — el movimiento dura más
+  var MAX_SPEED = 1.0;        // tope de velocidad más alto, más movimiento visible
+  var JITTER = 0.026;         // agitación térmica más notoria
 
   var REPEL_RADIUS = 130;     // radio de perturbación del cursor
   var REPEL_STRENGTH = 0.9;   // impulso del cursor (empuja, no atrae)
