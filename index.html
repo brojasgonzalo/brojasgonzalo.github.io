@@ -46,24 +46,11 @@
     flex-direction:column;
     justify-content:center;
     padding:8vh 8vw;
-    perspective:1200px;
   }
 
   .intro{
     max-width:34rem;
-    transform-style:preserve-3d;
-    transform:rotateX(0deg) rotateY(0deg);
-    will-change:transform;
   }
-
-  .intro > *{
-    transform-style:preserve-3d;
-  }
-
-  h1{ transform:translateZ(46px); }
-  .subtitle{ transform:translateZ(28px); }
-  .intro > p{ transform:translateZ(18px); }
-  .contact{ transform:translateZ(34px); }
 
   h1{
     font-weight:500;
@@ -170,36 +157,31 @@
   var nodes = [];
   var mouse = { x: -9999, y: -9999, active: false };
 
-  // Enjambre disperso, no átomos: cada nodo trae su propio movimiento de
-  // base (dirección aleatoria fija), y solo se repelen entre sí a muy
-  // corta distancia para no encimarse — sin atracción, así que no se
-  // arman cúmulos estables. Las líneas se dibujan cuando dos nodos pasan
-  // cerca por casualidad, no porque estén "enlazados".
-  var REPEL_RADIUS_NODE = 60;  // distancia a la que dos nodos se repelen
-  var REPEL_FORCE = 0.03;      // empuje al repelerse
-  var LINK_DIST = 120;         // distancia para dibujar línea entre nodos
-  var DAMPING = 0.985;         // fricción baja — el movimiento de base persiste
-  var MAX_SPEED = 0.5;         // tope de velocidad — bastante más calmado
-  var ANGLE_JITTER = 0.03;     // qué tan rápido gira el rumbo — bajo, para que sea suave
-  var WANDER_FORCE = 0.005;    // empuje continuo en la dirección del rumbo actual — mucho más suave
+  // Nube de puntos en un espacio 3D real (no simulado): cada nodo tiene
+  // x, y, z en unidades de "mundo" independientes de los píxeles de
+  // pantalla. Toda la nube gira despacio sobre su eje y responde un
+  // poco al cursor (como girar un globo), y cada frame se proyecta con
+  // perspectiva real (entre más lejos en z, más chico y más tenue) —
+  // por eso el efecto de profundidad no depende de ningún truco visual,
+  // es geometría.
+  // el volumen 3D se dimensiona en resize() en proporción al viewport,
+  // así la nube siempre llena la pantalla en vez de quedar como una
+  // esfera chica flotando en el centro
+  var HALF_X, HALF_Y, HALF_Z, CAM_DIST, FOCAL;
 
-  var REPEL_RADIUS = 130;      // radio de perturbación del cursor
-  var REPEL_STRENGTH = 0.9;    // impulso del cursor (empuja, no atrae)
+  // estas cuatro se recalculan en resize() en proporción al tamaño del
+  // volumen 3D, para que la densidad de líneas y la velocidad se vean
+  // igual sin importar el tamaño de la ventana
+  var LINK_DIST, WANDER_FORCE, MAX_SPEED;
+  var DAMPING = 0.985;
 
-  // Profundidad: cada nodo vive en un plano z entre 0.15 (lejos) y 1 (cerca).
-  // No hay proyección de perspectiva real (dividir por z) porque el campo
-  // ya es 2D y plano — en cambio simulamos la sensación de profundidad con
-  // tres señales baratas y consistentes entre sí: los nodos cercanos son
-  // más grandes, más brillantes y se mueven más rápido (parallax de
-  // movimiento propio), y además todo el plano se desplaza según el mouse
-  // en proporción a z, como capas de un diorama.
-  var PARALLAX_SHIFT = 46;     // desplazamiento máx. de la capa más cercana, en px
-
-  var camera = { x: 0, y: 0 };
+  var rot = { y: 0, x: 0 };     // ángulo actual de la cámara
+  var targetTiltX = 0, targetTiltY = 0;
+  var AUTOSPIN = 0.0009;        // giro constante, aun sin mouse
 
   function nodeCount(){
     var area = window.innerWidth * window.innerHeight;
-    return Math.max(220, Math.min(450, Math.round(area / 4500)));
+    return Math.max(60, Math.min(130, Math.round(area / 12000)));
   }
 
   function resize(){
@@ -211,6 +193,16 @@
     canvas.style.width = W + 'px';
     canvas.style.height = H + 'px';
     ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+
+    var minDim = Math.min(W, H);
+    HALF_X = W * 0.62;
+    HALF_Y = H * 0.62;
+    HALF_Z = minDim * 0.62;
+    CAM_DIST = minDim * 0.85;
+    FOCAL = minDim * 0.95;
+    LINK_DIST = minDim * 0.22;
+    WANDER_FORCE = minDim * 0.0000045;
+    MAX_SPEED = minDim * 0.00045;
   }
 
   function makeNodes(){
@@ -218,116 +210,105 @@
     nodes = [];
     for (var i = 0; i < n; i++){
       nodes.push({
-        x: Math.random() * W,
-        y: Math.random() * H,
-        vx: 0,
-        vy: 0,
+        x: (Math.random() * 2 - 1) * HALF_X,
+        y: (Math.random() * 2 - 1) * HALF_Y,
+        z: (Math.random() * 2 - 1) * HALF_Z,
+        vx: 0, vy: 0, vz: 0,
         angle: Math.random() * Math.PI * 2,
-        r: 1 + Math.random() * 1.2,
-        z: 0.15 + Math.random() * 0.85
+        axis: Math.random() * Math.PI * 2,
+        r: 1 + Math.random() * 1.3
       });
     }
+  }
+
+  // proyecta un punto del mundo 3D (ya rotado) a coordenadas de pantalla
+  function project(p){
+    var scale = FOCAL / (FOCAL + p.rz + CAM_DIST);
+    return {
+      x: W / 2 + p.rx * scale,
+      y: H / 2 + p.ry * scale,
+      scale: scale
+    };
   }
 
   function step(){
     ctx.clearRect(0, 0, W, H);
 
-    // paralaje de cámara: todo el plano se corre según la posición del
-    // mouse relativa al centro, y cada nodo obedece en proporción a su z
-    // (las capas cercanas se mueven más que las lejanas) — es la señal
-    // de profundidad más fuerte de las tres.
-    if (mouse.active){
-      var camTx = (mouse.x / W - 0.5) * PARALLAX_SHIFT;
-      var camTy = (mouse.y / H - 0.5) * PARALLAX_SHIFT;
-      camera.x += (camTx - camera.x) * 0.04;
-      camera.y += (camTy - camera.y) * 0.04;
-    } else {
-      camera.x *= 0.96; camera.y *= 0.96;
+    rot.y += AUTOSPIN + targetTiltY * 0.002; // giro constante + leve empujón del cursor
+    rot.x += (targetTiltX - rot.x) * 0.04;   // inclinación (pitch) sigue al cursor con suavizado
+
+    var cosY = Math.cos(rot.y), sinY = Math.sin(rot.y);
+    var cosX = Math.cos(rot.x), sinX = Math.sin(rot.x);
+
+    // integración física en el espacio 3D real (deriva propia + fricción)
+    for (var i = 0; i < nodes.length; i++){
+      var a = nodes[i];
+      a.angle += (Math.random() - 0.5) * 0.03;
+      a.axis += (Math.random() - 0.5) * 0.03;
+      a.vx += Math.cos(a.angle) * Math.cos(a.axis) * WANDER_FORCE;
+      a.vy += Math.sin(a.axis) * WANDER_FORCE;
+      a.vz += Math.sin(a.angle) * Math.cos(a.axis) * WANDER_FORCE;
+
+      a.vx *= DAMPING; a.vy *= DAMPING; a.vz *= DAMPING;
+      var speed = Math.sqrt(a.vx * a.vx + a.vy * a.vy + a.vz * a.vz);
+      if (speed > MAX_SPEED){
+        var k = MAX_SPEED / speed;
+        a.vx *= k; a.vy *= k; a.vz *= k;
+      }
+
+      a.x += a.vx; a.y += a.vy; a.z += a.vz;
+      if (a.x < -HALF_X) a.x = -HALF_X, a.vx *= -1;
+      if (a.x > HALF_X) a.x = HALF_X, a.vx *= -1;
+      if (a.y < -HALF_Y) a.y = -HALF_Y, a.vy *= -1;
+      if (a.y > HALF_Y) a.y = HALF_Y, a.vy *= -1;
+      if (a.z < -HALF_Z) a.z = -HALF_Z, a.vz *= -1;
+      if (a.z > HALF_Z) a.z = HALF_Z, a.vz *= -1;
+
+      // rotación de cámara alrededor de Y y luego de X
+      var x1 = a.x * cosY - a.z * sinY;
+      var z1 = a.x * sinY + a.z * cosY;
+      var y1 = a.y * cosX - z1 * sinX;
+      var z2 = a.y * sinX + z1 * cosX;
+
+      a.rx = x1; a.ry = y1; a.rz = z2;
+      var proj = project(a);
+      a.sx = proj.x; a.sy = proj.y; a.sc = proj.scale;
     }
 
-    // un solo recorrido por cada par: calcula la fuerza entre ambos
-    // nodos y, si están lo bastante cerca, dibuja la línea que los une
-    // (la línea es literalmente "acá hay una fuerza actuando"). la
-    // posición usada para dibujar incluye el corrimiento de paralaje,
-    // pero la física (distancias, repulsión) sigue el plano real.
+    // líneas: distancia real en el espacio 3D rotado, así que solo se
+    // conectan nodos que de verdad están cerca en profundidad, no solo
+    // superpuestos en pantalla
     ctx.lineWidth = 1;
     for (var i = 0; i < nodes.length; i++){
       var a = nodes[i];
       for (var j = i + 1; j < nodes.length; j++){
         var b = nodes[j];
-        var dx = b.x - a.x, dy = b.y - a.y;
-        var dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < 0.001 || dist > LINK_DIST) continue;
+        var dx = a.rx - b.rx, dy = a.ry - b.ry, dz = a.rz - b.rz;
+        var dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
+        if (dist > LINK_DIST) continue;
 
-        // solo repulsión, y solo a muy corta distancia — sin atracción
-        // no hay nada que arme cúmulos estables
-        if (dist < REPEL_RADIUS_NODE){
-          var nx = dx / dist, ny = dy / dist;
-          var f = -((REPEL_RADIUS_NODE - dist) / REPEL_RADIUS_NODE) * REPEL_FORCE;
-          a.vx += nx * f; a.vy += ny * f;
-          b.vx -= nx * f; b.vy -= ny * f;
-        }
-
-        var zAvg = (a.z + b.z) * 0.5;
-        var op = (1 - dist / LINK_DIST) * 0.16 * (0.35 + zAvg * 0.9);
+        var opScale = (a.sc + b.sc) * 0.5;
+        var op = (1 - dist / LINK_DIST) * 0.22 * Math.min(1, opScale * 0.9);
         var key = (i * 7 + j * 13) % 10;
         var rgb = key < 8 ? '237,236,230' : (key === 8 ? '138,164,214' : '196,150,120');
-        ctx.strokeStyle = 'rgba(' + rgb + ',' + op.toFixed(3) + ')';
+        ctx.strokeStyle = 'rgba(' + rgb + ',' + Math.max(0, op).toFixed(3) + ')';
         ctx.beginPath();
-        ctx.moveTo(a.x + camera.x * a.z, a.y + camera.y * a.z);
-        ctx.lineTo(b.x + camera.x * b.z, b.y + camera.y * b.z);
+        ctx.moveTo(a.sx, a.sy);
+        ctx.lineTo(b.sx, b.sy);
         ctx.stroke();
       }
     }
 
-    // integración: deriva suave de rumbo (no ruido puro — el ángulo gira
-    // apenas cada frame, como una corriente que cambia de a poco, no
-    // como una partícula vibrando al azar), perturbación del cursor,
-    // fricción, tope de velocidad, y avance de posición. la velocidad
-    // base y el tope se escalan por z: las capas cercanas se sienten
-    // más rápidas, las lejanas casi quietas — parallax de movimiento.
-    for (var i = 0; i < nodes.length; i++){
-      var a = nodes[i];
-      var zScale = 0.35 + a.z * 0.9;
-
-      a.angle += (Math.random() - 0.5) * ANGLE_JITTER;
-      a.vx += Math.cos(a.angle) * WANDER_FORCE * zScale;
-      a.vy += Math.sin(a.angle) * WANDER_FORCE * zScale;
-
-      if (mouse.active){
-        var mdx = a.x - mouse.x, mdy = a.y - mouse.y;
-        var mdist = Math.sqrt(mdx * mdx + mdy * mdy);
-        if (mdist < REPEL_RADIUS && mdist > 0.001){
-          var mforce = (1 - mdist / REPEL_RADIUS) * REPEL_STRENGTH;
-          a.vx += (mdx / mdist) * mforce * 0.08;
-          a.vy += (mdy / mdist) * mforce * 0.08;
-        }
-      }
-
-      a.vx *= DAMPING; a.vy *= DAMPING;
-      var speed = Math.sqrt(a.vx * a.vx + a.vy * a.vy);
-      var maxSpeed = MAX_SPEED * zScale;
-      if (speed > maxSpeed){ a.vx = (a.vx / speed) * maxSpeed; a.vy = (a.vy / speed) * maxSpeed; }
-
-      a.x += a.vx; a.y += a.vy;
-
-      if (a.x < -10) a.x = W + 10;
-      if (a.x > W + 10) a.x = -10;
-      if (a.y < -10) a.y = H + 10;
-      if (a.y > H + 10) a.y = -10;
-    }
-
-    // nodos: ordenados de lejos a cerca para que los cercanos —más
-    // grandes y brillantes— queden dibujados encima, como en cualquier
-    // escena con profundidad real.
-    var ordered = nodes.slice().sort(function(p, q){ return p.z - q.z; });
+    // nodos: de atrás hacia adelante, para que los cercanos —agrandados
+    // por la perspectiva— tapen a los lejanos, como corresponde en 3D
+    var ordered = nodes.slice().sort(function(p, q){ return p.rz - q.rz; });
     for (var i = 0; i < ordered.length; i++){
       var a = ordered[i];
-      var alpha = 0.18 + a.z * 0.55;
-      var radius = a.r * (0.5 + a.z * 1.1);
+      var alpha = Math.max(0.08, Math.min(0.85, 0.15 + a.sc * 0.55));
+      var radius = Math.max(0.4, a.r * a.sc);
       ctx.fillStyle = 'rgba(237,236,230,' + alpha.toFixed(3) + ')';
       ctx.beginPath();
-      ctx.arc(a.x + camera.x * a.z, a.y + camera.y * a.z, radius, 0, Math.PI * 2);
+      ctx.arc(a.sx, a.sy, radius, 0, Math.PI * 2);
       ctx.fill();
     }
 
@@ -338,9 +319,13 @@
     mouse.x = e.clientX;
     mouse.y = e.clientY;
     mouse.active = true;
+    targetTiltX = (e.clientY / H - 0.5) * 0.5;
+    targetTiltY = (e.clientX / W - 0.5);
   });
   window.addEventListener('mouseleave', function(){
     mouse.active = false;
+    targetTiltX = 0;
+    targetTiltY = 0;
   });
 
   window.addEventListener('resize', function(){
@@ -352,33 +337,6 @@
   resize();
   makeNodes();
   step();
-
-  // tilt 3D del bloque de texto: el mismo cursor que mueve las capas del
-  // canvas también inclina el contenido, como si fuera una tarjeta
-  // flotando sobre la escena — refuerza la lectura de profundidad en
-  // lugar de competir con ella.
-  if (!reduceMotion){
-    var intro = document.querySelector('.intro');
-    var tilt = { rx: 0, ry: 0, targetRx: 0, targetRy: 0 };
-
-    window.addEventListener('mousemove', function(e){
-      var nx = e.clientX / window.innerWidth - 0.5;
-      var ny = e.clientY / window.innerHeight - 0.5;
-      tilt.targetRx = -ny * 9;
-      tilt.targetRy = nx * 12;
-    });
-    window.addEventListener('mouseleave', function(){
-      tilt.targetRx = 0;
-      tilt.targetRy = 0;
-    });
-
-    (function tiltStep(){
-      tilt.rx += (tilt.targetRx - tilt.rx) * 0.06;
-      tilt.ry += (tilt.targetRy - tilt.ry) * 0.06;
-      intro.style.transform = 'rotateX(' + tilt.rx.toFixed(2) + 'deg) rotateY(' + tilt.ry.toFixed(2) + 'deg)';
-      requestAnimationFrame(tiltStep);
-    })();
-  }
 })();
 </script>
 
