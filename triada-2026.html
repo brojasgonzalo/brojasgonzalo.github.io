@@ -1,0 +1,364 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>La Tríada 2026 · Gonzalo Bustamante Rojas</title>
+<meta name="description" content="Ponencia de Gonzalo Bustamante Rojas en el 4º Congreso Latinoamericano de Ciencias Sociales y Gobierno de La Tríada (CDMX, 1 de octubre de 2026).">
+<link rel="icon" href="data:,">
+<style>
+  :root{
+    --bg:#0A0B0E;
+    --ink:#EDECE6;
+    --ink-soft:#8B8C92;
+    --line:#EDECE6;
+    --accent:rgba(140,220,255,0.9);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Times New Roman', 'Liberation Serif', Georgia, 'Nimbus Roman', serif;
+    overflow-x:hidden;
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.01ms !important; transition-duration:0.01ms !important;}
+  }
+
+  .top{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:1em;
+    padding:5vh 8vw 0;
+  }
+  .back{
+    color:var(--ink-soft);
+    text-decoration:none;
+    font-size:0.85rem;
+    letter-spacing:0.02em;
+    border-bottom:1px solid transparent;
+    transition:color 0.2s, border-color 0.2s;
+  }
+  .back:hover{color:var(--ink); border-color:var(--ink-soft);}
+
+  .lang-toggle{
+    display:flex;
+    align-items:center;
+    gap:0.6em;
+    background:rgba(255,255,255,0.04);
+    border:1px solid rgba(140,220,255,0.4);
+    border-radius:999px;
+    padding:0.4em 0.9em 0.4em 0.7em;
+    cursor:pointer;
+    box-shadow:0 0 18px rgba(140,220,255,0.12);
+    transition:border-color 0.2s, box-shadow 0.2s;
+  }
+  .lang-toggle:hover{border-color:rgba(140,220,255,0.75); box-shadow:0 0 24px rgba(140,220,255,0.22);}
+  .lang-toggle .lang-icon{width:18px; height:18px; flex-shrink:0; color:var(--accent);}
+  .lang-track{
+    position:relative;
+    display:flex;
+    width:56px;
+    height:22px;
+    border-radius:999px;
+    background:rgba(237,236,230,0.08);
+    font-family:ui-monospace, SFMono-Regular, Consolas, monospace;
+    font-size:0.62rem;
+    letter-spacing:0.02em;
+    overflow:hidden;
+  }
+  .lang-option{
+    width:28px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    position:relative;
+    z-index:1;
+    color:var(--ink-soft);
+    transition:color 0.2s;
+  }
+  .lang-thumb{
+    position:absolute;
+    top:2px;
+    left:2px;
+    width:24px;
+    height:18px;
+    border-radius:999px;
+    background:var(--accent);
+    box-shadow:0 0 10px rgba(140,220,255,0.55);
+    transition:transform 0.25s ease;
+  }
+  .lang-toggle[aria-checked="true"] .lang-thumb{transform:translateX(28px);}
+  .lang-toggle[aria-checked="true"] .lang-option.lang-en{color:#0A0B0E; font-weight:700;}
+  .lang-toggle:not([aria-checked="true"]) .lang-option.lang-es{color:#0A0B0E; font-weight:700;}
+
+  article{
+    max-width:46rem;
+    margin:0 auto;
+    padding:6vh 8vw 10vh;
+  }
+  @media (min-width: 900px){
+    article{padding-left:0; padding-right:0;}
+  }
+
+  .date{
+    display:block;
+    font-family:ui-monospace, SFMono-Regular, Consolas, monospace;
+    font-size:0.75rem;
+    letter-spacing:0.02em;
+    color:var(--ink-soft);
+    opacity:0.7;
+    margin-bottom:1em;
+  }
+  h1{
+    font-weight:700;
+    font-size:clamp(1.6rem, 3.4vw, 2.3rem);
+    line-height:1.2;
+    letter-spacing:0.01em;
+    margin:0 0 0.4em;
+  }
+  .event{
+    font-style:italic;
+    color:var(--ink-soft);
+    font-size:1rem;
+    margin:0 0 2em;
+  }
+
+  .carousel{
+    position:relative;
+    aspect-ratio:4 / 3;
+    border:1px solid rgba(237,236,230,0.15);
+    border-radius:4px;
+    overflow:hidden;
+    background:rgba(237,236,230,0.03);
+    margin-bottom:0.8em;
+  }
+  .carousel img{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    object-fit:contain;
+    opacity:0;
+    transition:opacity 0.9s ease;
+  }
+  .carousel img.active{opacity:1;}
+  .carousel button.nav{
+    position:absolute;
+    top:50%;
+    transform:translateY(-50%);
+    width:38px;
+    height:38px;
+    border-radius:50%;
+    border:1px solid rgba(237,236,230,0.3);
+    background:rgba(10,11,14,0.55);
+    color:var(--ink);
+    font-size:1.1rem;
+    line-height:1;
+    cursor:pointer;
+    opacity:0.7;
+    transition:opacity 0.2s, border-color 0.2s;
+  }
+  .carousel button.nav:hover{opacity:1; border-color:rgba(140,220,255,0.75);}
+  .carousel .prev{left:12px;}
+  .carousel .next{right:12px;}
+
+  .dots{
+    display:flex;
+    justify-content:center;
+    gap:0.6em;
+    margin-bottom:2.4em;
+  }
+  .dots button{
+    width:8px;
+    height:8px;
+    padding:0;
+    border-radius:50%;
+    border:none;
+    background:rgba(237,236,230,0.25);
+    cursor:pointer;
+    transition:background 0.2s, box-shadow 0.2s;
+  }
+  .dots button.active{background:var(--accent); box-shadow:0 0 8px rgba(140,220,255,0.55);}
+
+  .body p{
+    font-size:1.05rem;
+    line-height:1.65;
+    color:var(--ink-soft);
+    margin:0 0 1.1em;
+  }
+  .body strong{color:var(--ink); font-weight:400;}
+
+  .facts{
+    list-style:none;
+    padding:0;
+    margin:2em 0;
+    border-top:1px solid rgba(237,236,230,0.15);
+  }
+  .facts li{
+    display:flex;
+    gap:1.2em;
+    padding:0.7em 0;
+    border-bottom:1px solid rgba(237,236,230,0.15);
+    font-size:0.95rem;
+    color:var(--ink-soft);
+  }
+  .facts .k{
+    flex:0 0 7.5em;
+    font-family:ui-monospace, SFMono-Regular, Consolas, monospace;
+    font-size:0.72rem;
+    letter-spacing:0.04em;
+    text-transform:uppercase;
+    opacity:0.7;
+    padding-top:0.2em;
+  }
+  .facts .v{color:var(--ink);}
+
+  .links .label{
+    font-size:0.78rem;
+    font-style:italic;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    margin:2.4em 0 0.9em;
+  }
+  .links ul{list-style:none; padding:0; margin:0;}
+  .links li{margin:0 0 0.6em; font-size:0.95rem;}
+
+  a.inline, .links a{
+    color:var(--ink);
+    text-decoration:none;
+    border-bottom:1px solid var(--line);
+    transition:opacity 0.2s;
+  }
+  a.inline:hover, .links a:hover{opacity:0.6;}
+  a:focus-visible, button:focus-visible{outline:1px solid var(--ink-soft); outline-offset:4px;}
+</style>
+</head>
+<body>
+
+<div class="top">
+  <a class="back" href="./" data-es="← Volver" data-en="← Back">← Volver</a>
+  <button id="langToggle" class="lang-toggle" type="button" role="switch" aria-checked="false" aria-label="Switch language / Cambiar idioma">
+    <svg class="lang-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+    <span class="lang-track">
+      <span class="lang-option lang-es">ES</span>
+      <span class="lang-option lang-en">EN</span>
+      <span class="lang-thumb"></span>
+    </span>
+  </button>
+</div>
+
+<article>
+  <span class="date">01.10.2026</span>
+  <h1>La confianza ya viene: Tendencias generacionales en la confianza institucional del Chile de los últimos 20 años</h1>
+  <p class="event" data-es="IV Congreso Latinoamericano de Ciencias Sociales y Gobierno, La Tríada 2026." data-en="4th Latin American Congress of Social Sciences and Government, La Tríada 2026.">IV Congreso Latinoamericano de Ciencias Sociales y Gobierno, La Tríada 2026.</p>
+
+  <div class="carousel" id="carousel" aria-roledescription="carrusel">
+    <img class="active" src="img/triada-2026/01.jpg" alt="Gonzalo Bustamante Rojas presentando la portada de la ponencia">
+    <img src="img/triada-2026/02.jpg" alt="Gonzalo Bustamante Rojas durante la ponencia, frente a la portada">
+    <img src="img/triada-2026/03.jpg" alt="Lámina del marco teórico: por qué y cómo cambia la confianza institucional">
+    <img src="img/triada-2026/04.jpg" alt="Lámina de antecedentes: confianza institucional en Chile, 2006-2025">
+    <button class="nav prev" type="button" aria-label="Foto anterior">‹</button>
+    <button class="nav next" type="button" aria-label="Foto siguiente">›</button>
+  </div>
+  <div class="dots" id="dots"></div>
+
+  <div class="body">
+    <p data-es='Presenté esta ponencia en el campus Ciudad de México del Tecnológico de Monterrey, dentro del eje temático <strong>Estado y emociones</strong> del congreso, que este año tuvo como lema "Construcción de Estado en América Latina".' data-en='I presented this paper at the Mexico City campus of Tecnológico de Monterrey, within the congress track <strong>State and emotions</strong>. This year the congress was themed "State building in Latin America".'>Presenté esta ponencia en el campus Ciudad de México del Tecnológico de Monterrey, dentro del eje temático <strong>Estado y emociones</strong> del congreso, que este año tuvo como lema "Construcción de Estado en América Latina".</p>
+    <p data-es="El trabajo, escrito junto a Alonso Quintero Contreras, usa la Encuesta Bicentenario UC (2006-2025) para separar edad, período y cohorte en la confianza hacia el gobierno, el parlamento, los partidos, las FF.AA. y la Iglesia, y preguntarse si existe una ruptura generacional real en el Chile de las últimas dos décadas." data-en="The paper, co-authored with Alonso Quintero Contreras, uses the Encuesta Bicentenario UC (2006-2025) to separate age, period and cohort effects in trust toward the government, parliament, political parties, the armed forces and the Church, asking whether there is a real generational break in Chile over the last two decades.">El trabajo, escrito junto a Alonso Quintero Contreras, usa la Encuesta Bicentenario UC (2006-2025) para separar edad, período y cohorte en la confianza hacia el gobierno, el parlamento, los partidos, las FF.AA. y la Iglesia, y preguntarse si existe una ruptura generacional real en el Chile de las últimas dos décadas.</p>
+  </div>
+
+  <ul class="facts">
+    <li><span class="k" data-es="Fecha" data-en="Date">Fecha</span><span class="v" data-es="1 de octubre de 2026" data-en="October 1, 2026">1 de octubre de 2026</span></li>
+    <li><span class="k" data-es="Lugar" data-en="Venue">Lugar</span><span class="v" data-es="Tecnológico de Monterrey, campus Ciudad de México" data-en="Tecnológico de Monterrey, Mexico City campus">Tecnológico de Monterrey, campus Ciudad de México</span></li>
+    <li><span class="k" data-es="Eje" data-en="Track">Eje</span><span class="v" data-es="Estado y emociones" data-en="State and emotions">Estado y emociones</span></li>
+    <li><span class="k" data-es="Autores" data-en="Authors">Autores</span><span class="v">Gonzalo Bustamante Rojas, Alonso Quintero Contreras</span></li>
+  </ul>
+
+  <div class="links">
+    <p class="label" data-es="Presentación" data-en="Slides">Presentación</p>
+    <ul>
+      <li><a href="docs/la-confianza-ya-viene-triada-2026.pdf" target="_blank" rel="noopener" data-es="La confianza ya viene (PDF, 8,6 MB)" data-en="La confianza ya viene (PDF, 8.6 MB)">La confianza ya viene (PDF, 8,6 MB)</a></li>
+    </ul>
+
+    <p class="label" data-es="Links oficiales" data-en="Official links">Links oficiales</p>
+    <ul>
+      <li><a href="https://www.congresotriada.org/" data-es="Sitio del congreso" data-en="Congress website">Sitio del congreso</a></li>
+      <li><a href="https://www.congresotriada.org/programa-ponencias" data-es="Programa de ponencias" data-en="Paper program">Programa de ponencias</a></li>
+      <li><a href="https://www.congresotriada.org/convocatoria" data-es="Convocatoria 2026" data-en="2026 call for papers">Convocatoria 2026</a></li>
+      <li><a href="https://latriada.tec.mx/es" data-es="La Tríada (Tec de Monterrey, Uniandes, PUC Chile)" data-en="La Tríada (Tec de Monterrey, Uniandes, PUC Chile)">La Tríada (Tec de Monterrey, Uniandes, PUC Chile)</a></li>
+    </ul>
+  </div>
+</article>
+
+<script>
+(function(){
+  var root = document.getElementById('carousel');
+  var slides = root.querySelectorAll('img');
+  var dotsBox = document.getElementById('dots');
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var current = 0, timer = null, DELAY = 4500;
+
+  slides.forEach(function(_, i){
+    var d = document.createElement('button');
+    d.type = 'button';
+    d.setAttribute('aria-label', 'Foto ' + (i + 1));
+    d.addEventListener('click', function(){ go(i); restart(); });
+    dotsBox.appendChild(d);
+  });
+  var dots = dotsBox.querySelectorAll('button');
+
+  function go(i){
+    slides[current].classList.remove('active');
+    dots[current].classList.remove('active');
+    current = (i + slides.length) % slides.length;
+    slides[current].classList.add('active');
+    dots[current].classList.add('active');
+  }
+  function start(){ if (!reduceMotion) timer = setInterval(function(){ go(current + 1); }, DELAY); }
+  function stop(){ clearInterval(timer); timer = null; }
+  function restart(){ stop(); start(); }
+
+  root.querySelector('.prev').addEventListener('click', function(){ go(current - 1); restart(); });
+  root.querySelector('.next').addEventListener('click', function(){ go(current + 1); restart(); });
+  root.addEventListener('mouseenter', stop);
+  root.addEventListener('mouseleave', start);
+
+  // deslizar con el dedo en el celular
+  var touchX = null;
+  root.addEventListener('touchstart', function(e){ touchX = e.touches[0].clientX; stop(); }, {passive:true});
+  root.addEventListener('touchend', function(e){
+    if (touchX === null) return;
+    var dx = e.changedTouches[0].clientX - touchX;
+    if (Math.abs(dx) > 40) go(current + (dx < 0 ? 1 : -1));
+    touchX = null;
+    start();
+  });
+
+  go(0);
+  start();
+})();
+</script>
+
+<script>
+(function(){
+  var btn = document.getElementById('langToggle');
+  var translatable = document.querySelectorAll('[data-es]');
+  var lang = 'es';
+
+  btn.addEventListener('click', function(){
+    lang = lang === 'es' ? 'en' : 'es';
+    document.documentElement.lang = lang;
+    btn.setAttribute('aria-checked', lang === 'en' ? 'true' : 'false');
+    translatable.forEach(function(el){
+      el.innerHTML = el.getAttribute('data-' + lang);
+    });
+  });
+})();
+</script>
+
+</body>
+</html>

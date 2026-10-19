@@ -282,6 +282,21 @@
     object-fit:contain;
     display:block;
   }
+  .novedad-img.foto{
+    height:170px;
+    padding:0;
+    overflow:hidden;
+    transition:border-color 0.2s;
+  }
+  .novedad-img.foto:hover{border-color:rgba(237,236,230,0.45);}
+  .novedad-img.foto img{
+    width:100%;
+    height:100%;
+    max-width:none;
+    max-height:none;
+    object-fit:cover;
+    object-position:center 35%;
+  }
   .novedad p{
     white-space:normal;
     font-size:0.85rem;
@@ -353,6 +368,12 @@
     <p class="label" data-es="Novedades" data-en="News">Novedades</p>
 
     <div class="novedad">
+      <span class="novedad-date">01.10.2026</span>
+      <a class="novedad-img foto" href="triada-2026.html"><img src="img/triada-2026/01.jpg" alt="Ponencia en el Congreso La Tríada 2026"></a>
+      <p data-es='Ponencia en el <a href="triada-2026.html">4º Congreso La Tríada 2026</a> (CDMX): "La confianza ya viene", eje Estado y emociones.' data-en='Talk at the <a href="triada-2026.html">4th La Tríada Congress 2026</a> (Mexico City): "La confianza ya viene", State and emotions track.'>Ponencia en el <a href="triada-2026.html">4º Congreso La Tríada 2026</a> (CDMX): "La confianza ya viene", eje Estado y emociones.</p>
+    </div>
+
+    <div class="novedad">
       <span class="novedad-date">30.03.2026</span>
       <div class="novedad-img"><img src="ciper-cadem.png" alt="CIPER"></div>
       <p data-es='Columna en CIPER: <a href="https://www.ciperchile.cl/2026/03/30/nueva-metodologia-cadem-y-el-arte-de-parecer-riguroso/">"Nueva metodología Cadem y el arte de parecer riguroso"</a>.' data-en='Op-ed in CIPER: <a href="https://www.ciperchile.cl/2026/03/30/nueva-metodologia-cadem-y-el-arte-de-parecer-riguroso/">"Nueva metodología Cadem y el arte de parecer riguroso"</a>.'>Columna en CIPER: <a href="https://www.ciperchile.cl/2026/03/30/nueva-metodologia-cadem-y-el-arte-de-parecer-riguroso/">"Nueva metodología Cadem y el arte de parecer riguroso"</a>.</p>
@@ -361,10 +382,6 @@
 
   <aside class="en-progreso">
     <p class="label" data-es="En progreso" data-en="In progress">En progreso</p>
-
-    <div class="en-curso">
-      <p data-es='Ponencia aceptada como autor en el <a href="https://latriada.tec.mx/es/ciencias-sociales/congreso-anual-internacional-de-investigacion-de-la-triada">4º Congreso La Tríada 2026</a> (CDMX, 1-2 oct).' data-en='Paper accepted as author at the <a href="https://latriada.tec.mx/es/ciencias-sociales/congreso-anual-internacional-de-investigacion-de-la-triada">4th La Tríada Congress 2026</a> (Mexico City, Oct 1-2).'>Ponencia aceptada como autor en el <a href="https://latriada.tec.mx/es/ciencias-sociales/congreso-anual-internacional-de-investigacion-de-la-triada">4º Congreso La Tríada 2026</a> (CDMX, 1-2 oct).</p>
-    </div>
 
     <div class="en-curso">
       <p data-es='Ponencia aceptada como coautor en las <a href="https://soche.cl/xlviii-jornadas-nacionales-de-estadistica-2026/">XLVIII Jornadas Nacionales de Estadística (SOCHE) 2026</a> (Valparaíso, 20-23 oct).' data-en='Paper accepted as co-author at the <a href="https://soche.cl/xlviii-jornadas-nacionales-de-estadistica-2026/">XLVIII Jornadas Nacionales de Estadística (SOCHE) 2026</a> (Valparaíso, Oct 20-23).'>Ponencia aceptada como coautor en las <a href="https://soche.cl/xlviii-jornadas-nacionales-de-estadistica-2026/">XLVIII Jornadas Nacionales de Estadística (SOCHE) 2026</a> (Valparaíso, 20-23 oct).</p>
