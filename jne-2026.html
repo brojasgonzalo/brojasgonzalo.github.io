@@ -1,0 +1,364 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>JNE 2026 · Gonzalo Bustamante Rojas</title>
+<meta name="description" content="Ponencia de Tomás Barrientos y Gonzalo Bustamante Rojas en las XLVIII Jornadas Nacionales de Estadística de la SOCHE (Valparaíso, 23 de octubre de 2026).">
+<link rel="icon" href="data:,">
+<style>
+  :root{
+    --bg:#0A0B0E;
+    --ink:#EDECE6;
+    --ink-soft:#8B8C92;
+    --line:#EDECE6;
+    --accent:rgba(140,220,255,0.9);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Times New Roman', 'Liberation Serif', Georgia, 'Nimbus Roman', serif;
+    overflow-x:hidden;
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.01ms !important; transition-duration:0.01ms !important;}
+  }
+
+  .top{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:1em;
+    padding:5vh 8vw 0;
+  }
+  .back{
+    color:var(--ink-soft);
+    text-decoration:none;
+    font-size:0.85rem;
+    letter-spacing:0.02em;
+    border-bottom:1px solid transparent;
+    transition:color 0.2s, border-color 0.2s;
+  }
+  .back:hover{color:var(--ink); border-color:var(--ink-soft);}
+
+  .lang-toggle{
+    display:flex;
+    align-items:center;
+    gap:0.6em;
+    background:rgba(255,255,255,0.04);
+    border:1px solid rgba(140,220,255,0.4);
+    border-radius:999px;
+    padding:0.4em 0.9em 0.4em 0.7em;
+    cursor:pointer;
+    box-shadow:0 0 18px rgba(140,220,255,0.12);
+    transition:border-color 0.2s, box-shadow 0.2s;
+  }
+  .lang-toggle:hover{border-color:rgba(140,220,255,0.75); box-shadow:0 0 24px rgba(140,220,255,0.22);}
+  .lang-toggle .lang-icon{width:18px; height:18px; flex-shrink:0; color:var(--accent);}
+  .lang-track{
+    position:relative;
+    display:flex;
+    width:56px;
+    height:22px;
+    border-radius:999px;
+    background:rgba(237,236,230,0.08);
+    font-family:ui-monospace, SFMono-Regular, Consolas, monospace;
+    font-size:0.62rem;
+    letter-spacing:0.02em;
+    overflow:hidden;
+  }
+  .lang-option{
+    width:28px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    position:relative;
+    z-index:1;
+    color:var(--ink-soft);
+    transition:color 0.2s;
+  }
+  .lang-thumb{
+    position:absolute;
+    top:2px;
+    left:2px;
+    width:24px;
+    height:18px;
+    border-radius:999px;
+    background:var(--accent);
+    box-shadow:0 0 10px rgba(140,220,255,0.55);
+    transition:transform 0.25s ease;
+  }
+  .lang-toggle[aria-checked="true"] .lang-thumb{transform:translateX(28px);}
+  .lang-toggle[aria-checked="true"] .lang-option.lang-en{color:#0A0B0E; font-weight:700;}
+  .lang-toggle:not([aria-checked="true"]) .lang-option.lang-es{color:#0A0B0E; font-weight:700;}
+
+  article{
+    max-width:46rem;
+    margin:0 auto;
+    padding:6vh 8vw 10vh;
+  }
+  @media (min-width: 900px){
+    article{padding-left:0; padding-right:0;}
+  }
+
+  .date{
+    display:block;
+    font-family:ui-monospace, SFMono-Regular, Consolas, monospace;
+    font-size:0.75rem;
+    letter-spacing:0.02em;
+    color:var(--ink-soft);
+    opacity:0.7;
+    margin-bottom:1em;
+  }
+  h1{
+    font-weight:700;
+    font-size:clamp(1.6rem, 3.4vw, 2.3rem);
+    line-height:1.2;
+    letter-spacing:0.01em;
+    margin:0 0 0.4em;
+  }
+  .event{
+    font-style:italic;
+    color:var(--ink-soft);
+    font-size:1rem;
+    margin:0 0 2em;
+  }
+
+  .carousel{
+    position:relative;
+    aspect-ratio:4 / 3;
+    border:1px solid rgba(237,236,230,0.15);
+    border-radius:4px;
+    overflow:hidden;
+    background:rgba(237,236,230,0.03);
+    margin-bottom:0.8em;
+  }
+  .carousel img{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    object-fit:contain;
+    opacity:0;
+    transition:opacity 0.9s ease;
+  }
+  .carousel img.active{opacity:1;}
+  .carousel button.nav{
+    position:absolute;
+    top:50%;
+    transform:translateY(-50%);
+    width:38px;
+    height:38px;
+    border-radius:50%;
+    border:1px solid rgba(237,236,230,0.3);
+    background:rgba(10,11,14,0.55);
+    color:var(--ink);
+    font-size:1.1rem;
+    line-height:1;
+    cursor:pointer;
+    opacity:0.7;
+    transition:opacity 0.2s, border-color 0.2s;
+  }
+  .carousel button.nav:hover{opacity:1; border-color:rgba(140,220,255,0.75);}
+  .carousel .prev{left:12px;}
+  .carousel .next{right:12px;}
+
+  .dots{
+    display:flex;
+    justify-content:center;
+    gap:0.6em;
+    margin-bottom:2.4em;
+  }
+  .dots button{
+    width:8px;
+    height:8px;
+    padding:0;
+    border-radius:50%;
+    border:none;
+    background:rgba(237,236,230,0.25);
+    cursor:pointer;
+    transition:background 0.2s, box-shadow 0.2s;
+  }
+  .dots button.active{background:var(--accent); box-shadow:0 0 8px rgba(140,220,255,0.55);}
+
+  .body p{
+    font-size:1.05rem;
+    line-height:1.65;
+    color:var(--ink-soft);
+    margin:0 0 1.1em;
+  }
+  .body strong{color:var(--ink); font-weight:400;}
+
+  .facts{
+    list-style:none;
+    padding:0;
+    margin:2em 0;
+    border-top:1px solid rgba(237,236,230,0.15);
+  }
+  .facts li{
+    display:flex;
+    gap:1.2em;
+    padding:0.7em 0;
+    border-bottom:1px solid rgba(237,236,230,0.15);
+    font-size:0.95rem;
+    color:var(--ink-soft);
+  }
+  .facts .k{
+    flex:0 0 7.5em;
+    font-family:ui-monospace, SFMono-Regular, Consolas, monospace;
+    font-size:0.72rem;
+    letter-spacing:0.04em;
+    text-transform:uppercase;
+    opacity:0.7;
+    padding-top:0.2em;
+  }
+  .facts .v{color:var(--ink);}
+
+  .links .label{
+    font-size:0.78rem;
+    font-style:italic;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    margin:2.4em 0 0.9em;
+  }
+  .links ul{list-style:none; padding:0; margin:0;}
+  .links li{margin:0 0 0.6em; font-size:0.95rem;}
+
+  a.inline, .links a{
+    color:var(--ink);
+    text-decoration:none;
+    border-bottom:1px solid var(--line);
+    transition:opacity 0.2s;
+  }
+  a.inline:hover, .links a:hover{opacity:0.6;}
+  a:focus-visible, button:focus-visible{outline:1px solid var(--ink-soft); outline-offset:4px;}
+</style>
+</head>
+<body>
+
+<div class="top">
+  <a class="back" href="./" data-es="← Volver" data-en="← Back">← Volver</a>
+  <button id="langToggle" class="lang-toggle" type="button" role="switch" aria-checked="false" aria-label="Switch language / Cambiar idioma">
+    <svg class="lang-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+    <span class="lang-track">
+      <span class="lang-option lang-es">ES</span>
+      <span class="lang-option lang-en">EN</span>
+      <span class="lang-thumb"></span>
+    </span>
+  </button>
+</div>
+
+<article>
+  <span class="date">23.10.2026</span>
+  <h1>Lírica musical chilena, su estructura temática y evolución en los últimos 25 años: evidencia desde el modelamiento estructural de tópicos</h1>
+  <p class="event" data-es="XLVIII Jornadas Nacionales de Estadística, Sociedad Chilena de Estadística (SOCHE) 2026." data-en="XLVIII National Statistics Conference (Jornadas Nacionales de Estadística), Chilean Statistical Society (SOCHE) 2026.">XLVIII Jornadas Nacionales de Estadística, Sociedad Chilena de Estadística (SOCHE) 2026.</p>
+
+  <div class="carousel" id="carousel" aria-roledescription="carrusel">
+    <img class="active" src="img/jne-2026/01.jpg" alt="Gonzalo Bustamante Rojas y Tomás Barrientos en un mirador de Valparaíso, con la bahía de fondo">
+    <img src="img/jne-2026/02.jpg" alt="Portada de la ponencia: Lírica musical chilena, su estructura temática y evolución en los últimos 25 años">
+    <img src="img/jne-2026/03.jpg" alt="Lámina con las nubes de palabras de los ocho tópicos del modelo">
+    <img src="img/jne-2026/04.jpg" alt="Lámina con la prevalencia de los ocho tópicos entre 2000 y 2025">
+    <button class="nav prev" type="button" aria-label="Foto anterior">‹</button>
+    <button class="nav next" type="button" aria-label="Foto siguiente">›</button>
+  </div>
+  <div class="dots" id="dots"></div>
+
+  <div class="body">
+    <p data-es='Presentamos esta ponencia junto a Tomás Barrientos en la sesión <strong>Miscelánea</strong> de las Jornadas, que este año se realizaron en la Universidad de Valparaíso.' data-en='Tomás Barrientos and I presented this paper in the <strong>Miscellaneous</strong> session of the conference, held this year at Universidad de Valparaíso.'>Presentamos esta ponencia junto a Tomás Barrientos en la sesión <strong>Miscelánea</strong> de las Jornadas, que este año se realizaron en la Universidad de Valparaíso.</p>
+    <p data-es="Es un trabajo exploratorio: con un modelo estructural de tópicos (STM) analizamos 8.572 letras de 363 artistas chilenos indexadas en Genius entre 2000 y 2025. Identificamos ocho tópicos cuya prevalencia sugiere un cambio cultural desde 2017, consistente entre distintas unidades de análisis: el perreo y el estilo gánster ganan espacio, mientras el desamor y la protesta lo pierden. Es una descripción base y el punto de partida para una etapa de medición e inferencia." data-en="This is exploratory work: using a structural topic model (STM), we analyzed 8,572 lyrics by 363 Chilean artists indexed on Genius between 2000 and 2025. We identified eight topics whose prevalence suggests a cultural shift since 2017, consistent across different units of analysis: perreo and gangster themes gain ground, while heartbreak and protest lose it. It is a baseline description and the starting point for a measurement and inference stage.">Es un trabajo exploratorio: con un modelo estructural de tópicos (STM) analizamos 8.572 letras de 363 artistas chilenos indexadas en Genius entre 2000 y 2025. Identificamos ocho tópicos cuya prevalencia sugiere un cambio cultural desde 2017, consistente entre distintas unidades de análisis: el perreo y el estilo gánster ganan espacio, mientras el desamor y la protesta lo pierden. Es una descripción base y el punto de partida para una etapa de medición e inferencia.</p>
+  </div>
+
+  <ul class="facts">
+    <li><span class="k" data-es="Fecha" data-en="Date">Fecha</span><span class="v" data-es="23 de octubre de 2026" data-en="October 23, 2026">23 de octubre de 2026</span></li>
+    <li><span class="k" data-es="Lugar" data-en="Venue">Lugar</span><span class="v" data-es="Universidad de Valparaíso, Facultad de Ingeniería" data-en="Universidad de Valparaíso, School of Engineering">Universidad de Valparaíso, Facultad de Ingeniería</span></li>
+    <li><span class="k" data-es="Sesión" data-en="Session">Sesión</span><span class="v" data-es="Miscelánea" data-en="Miscellaneous">Miscelánea</span></li>
+    <li><span class="k" data-es="Autores" data-en="Authors">Autores</span><span class="v">Tomás Barrientos, Gonzalo Bustamante Rojas</span></li>
+  </ul>
+
+  <div class="links">
+    <p class="label" data-es="Presentación" data-en="Slides">Presentación</p>
+    <ul>
+      <li><a href="docs/lirica-musical-chilena-jne-2026.pdf" target="_blank" rel="noopener" data-es="Lírica musical chilena (PDF, 2,3 MB)" data-en="Lírica musical chilena (PDF, 2.3 MB)">Lírica musical chilena (PDF, 2,3 MB)</a></li>
+      <li><a href="https://brrxs.github.io/projects/jne2026.html" data-es="Versión web en el sitio de Tomás Barrientos" data-en="Web version on Tomás Barrientos's site">Versión web en el sitio de Tomás Barrientos</a></li>
+    </ul>
+
+    <p class="label" data-es="Links oficiales" data-en="Official links">Links oficiales</p>
+    <ul>
+      <li><a href="https://soche.cl/xlviii-jornadas-nacionales-de-estadistica-2026/" data-es="Sitio de las Jornadas" data-en="Conference website">Sitio de las Jornadas</a></li>
+      <li><a href="https://drive.google.com/file/d/1M6HeIhpn8BrIpibVuY3D1hvBjNAM-zV-/view" data-es="Programa de las Jornadas" data-en="Conference program">Programa de las Jornadas</a></li>
+      <li><a href="https://soche.cl/" data-es="Sociedad Chilena de Estadística (SOCHE)" data-en="Chilean Statistical Society (SOCHE)">Sociedad Chilena de Estadística (SOCHE)</a></li>
+    </ul>
+  </div>
+</article>
+
+<script>
+(function(){
+  var root = document.getElementById('carousel');
+  var slides = root.querySelectorAll('img');
+  var dotsBox = document.getElementById('dots');
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var current = 0, timer = null, DELAY = 4500;
+
+  slides.forEach(function(_, i){
+    var d = document.createElement('button');
+    d.type = 'button';
+    d.setAttribute('aria-label', 'Foto ' + (i + 1));
+    d.addEventListener('click', function(){ go(i); restart(); });
+    dotsBox.appendChild(d);
+  });
+  var dots = dotsBox.querySelectorAll('button');
+
+  function go(i){
+    slides[current].classList.remove('active');
+    dots[current].classList.remove('active');
+    current = (i + slides.length) % slides.length;
+    slides[current].classList.add('active');
+    dots[current].classList.add('active');
+  }
+  function start(){ if (!reduceMotion) timer = setInterval(function(){ go(current + 1); }, DELAY); }
+  function stop(){ clearInterval(timer); timer = null; }
+  function restart(){ stop(); start(); }
+
+  root.querySelector('.prev').addEventListener('click', function(){ go(current - 1); restart(); });
+  root.querySelector('.next').addEventListener('click', function(){ go(current + 1); restart(); });
+  root.addEventListener('mouseenter', stop);
+  root.addEventListener('mouseleave', start);
+
+  // deslizar con el dedo en el celular
+  var touchX = null;
+  root.addEventListener('touchstart', function(e){ touchX = e.touches[0].clientX; stop(); }, {passive:true});
+  root.addEventListener('touchend', function(e){
+    if (touchX === null) return;
+    var dx = e.changedTouches[0].clientX - touchX;
+    if (Math.abs(dx) > 40) go(current + (dx < 0 ? 1 : -1));
+    touchX = null;
+    start();
+  });
+
+  go(0);
+  start();
+})();
+</script>
+
+<script>
+(function(){
+  var btn = document.getElementById('langToggle');
+  var translatable = document.querySelectorAll('[data-es]');
+  var lang = 'es';
+
+  btn.addEventListener('click', function(){
+    lang = lang === 'es' ? 'en' : 'es';
+    document.documentElement.lang = lang;
+    btn.setAttribute('aria-checked', lang === 'en' ? 'true' : 'false');
+    translatable.forEach(function(el){
+      el.innerHTML = el.getAttribute('data-' + lang);
+    });
+  });
+})();
+</script>
+
+</body>
+</html>
