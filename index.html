@@ -26,7 +26,7 @@
     *{animation-duration:0.01ms !important; transition-duration:0.01ms !important;}
   }
   @media (max-width: 640px){
-    p{ white-space:normal; }
+    .intro p{ white-space:normal; }
   }
 
   canvas#net{
@@ -203,114 +203,127 @@
   .right-panel{
     position:fixed;
     right:8vw;
-    top:6vh;
-    width:360px;
-    max-height:88vh;
-    display:flex;
-    flex-direction:column;
-    gap:1.8em;
+    top:50%;
+    transform:translateY(-50%);
+    width:380px;
     z-index:1;
   }
 
   .novedades{
     position:static;
-    max-height:42vh;
-    overflow-y:auto;
-    scrollbar-width:thin;
-    scrollbar-color:var(--ink-soft) transparent;
+    display:flex;
+    flex-direction:column;
+    max-height:min(76vh, 600px);
+    background:rgba(13,14,18,0.72);
+    -webkit-backdrop-filter:blur(10px);
+    backdrop-filter:blur(10px);
+    border:1px solid rgba(237,236,230,0.14);
+    border-radius:10px;
+    box-shadow:0 24px 60px rgba(0,0,0,0.55), 0 0 22px rgba(140,220,255,0.05);
+    overflow:hidden;
   }
-  .novedades::-webkit-scrollbar{width:6px;}
-  .novedades::-webkit-scrollbar-thumb{background:rgba(237,236,230,0.3); border-radius:3px;}
 
-  .en-progreso{
-    position:static;
+  .ventana-barra{
+    display:flex;
+    align-items:center;
+    gap:0.8em;
+    padding:0.7em 1em;
+    border-bottom:1px solid rgba(237,236,230,0.1);
+    background:rgba(237,236,230,0.025);
+    flex-shrink:0;
   }
-
-  .novedades .label,
-  .en-progreso .label{
-    font-size:0.78rem;
-    font-style:italic;
-    letter-spacing:0.06em;
+  .ventana-puntos{display:flex; gap:6px;}
+  .ventana-puntos i{
+    width:8px;
+    height:8px;
+    border-radius:50%;
+    border:1px solid rgba(237,236,230,0.3);
+  }
+  .ventana-puntos i:first-child{
+    border-color:rgba(140,220,255,0.7);
+    background:rgba(140,220,255,0.35);
+  }
+  .novedades .label{
+    flex:1;
+    font-family:ui-monospace, SFMono-Regular, Consolas, monospace;
+    font-size:0.68rem;
+    letter-spacing:0.12em;
     text-transform:uppercase;
     color:var(--ink-soft);
-    margin:0 0 0.9em;
-    padding-bottom:0.6em;
-    border-bottom:1px solid rgba(237,236,230,0.15);
-  }
-
-  .en-curso{margin-bottom:1em;}
-  .en-curso:last-child{margin-bottom:0;}
-  .en-curso p{
-    white-space:normal;
-    font-size:0.83rem;
-    line-height:1.55;
-    color:var(--ink-soft);
+    white-space:nowrap;
     margin:0;
   }
+  .ventana-cuenta{
+    font-family:ui-monospace, SFMono-Regular, Consolas, monospace;
+    font-size:0.64rem;
+    color:var(--ink-soft);
+    opacity:0.55;
+  }
 
-  .novedad{margin-bottom:1.7em;}
-  .novedad:last-child{margin-bottom:0;}
+  .ventana-cuerpo{
+    overflow-y:auto;
+    scrollbar-width:thin;
+    scrollbar-color:rgba(237,236,230,0.25) transparent;
+  }
+  .ventana-cuerpo::-webkit-scrollbar{width:6px;}
+  .ventana-cuerpo::-webkit-scrollbar-thumb{background:rgba(237,236,230,0.25); border-radius:3px;}
+
+  .novedad{
+    display:grid;
+    grid-template-columns:84px 1fr;
+    gap:14px;
+    align-items:start;
+    padding:1em;
+    border-bottom:1px solid rgba(237,236,230,0.07);
+    transition:background 0.2s;
+  }
+  .novedad:last-child{border-bottom:0;}
+  .novedad:hover{background:rgba(237,236,230,0.03);}
+
+  .novedad-img{
+    display:block;
+    width:84px;
+    height:84px;
+    border-radius:6px;
+    overflow:hidden;
+    border:1px solid rgba(237,236,230,0.12);
+    transition:border-color 0.2s;
+  }
+  .novedad-img:hover{border-color:rgba(140,220,255,0.6);}
+  .novedad-img img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    object-position:center 35%;
+    display:block;
+  }
+
   .novedad-date{
     display:block;
     font-family:ui-monospace, SFMono-Regular, Consolas, monospace;
-    font-size:0.7rem;
-    letter-spacing:0.02em;
-    color:var(--ink-soft);
-    opacity:0.6;
-    margin-bottom:0.6em;
-  }
-  .novedad-img{
-    width:100%;
-    height:130px;
-    margin-bottom:0.6em;
-    padding:16px;
-    border:1px solid rgba(237,236,230,0.15);
-    border-radius:4px;
-    background:rgba(237,236,230,0.03);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-  }
-  .novedad-img:empty{
-    border-style:dashed;
-    border-color:rgba(237,236,230,0.25);
-    background:repeating-linear-gradient(135deg, rgba(237,236,230,0.05) 0px, rgba(237,236,230,0.05) 8px, transparent 8px, transparent 16px);
-  }
-  .novedad-img img{
-    max-width:100%;
-    max-height:100%;
-    object-fit:contain;
-    display:block;
-  }
-  .novedad-img.foto{
-    height:170px;
-    padding:0;
-    overflow:hidden;
-    transition:border-color 0.2s;
-  }
-  .novedad-img.foto:hover{border-color:rgba(237,236,230,0.45);}
-  .novedad-img.foto img{
-    width:100%;
-    height:100%;
-    max-width:none;
-    max-height:none;
-    object-fit:cover;
-    object-position:center 35%;
+    font-size:0.66rem;
+    letter-spacing:0.04em;
+    color:rgba(140,220,255,0.7);
+    margin:0.1em 0 0.45em;
   }
   .novedad p{
     white-space:normal;
-    font-size:0.85rem;
-    line-height:1.55;
+    font-size:0.84rem;
+    line-height:1.5;
     color:var(--ink-soft);
     margin:0;
   }
 
   @media (max-width: 1100px){
     .lang-toggle{position:static; margin:4vh 0 0 8vw;}
-    aside, .right-panel{position:static; width:auto; max-width:none; max-height:none; overflow:visible;}
+    aside, .right-panel{position:static; transform:none; width:auto; max-width:none; max-height:none;}
     .about-extra{margin:4vh 8vw 0;}
-    .right-panel{margin:6vh 8vw 4vh; gap:2.4em;}
-    .novedades{max-height:none; overflow:visible;}
+    .right-panel{margin:6vh 8vw 4vh; max-width:520px;}
+    .novedades{max-height:none;}
+  }
+  @media (max-width: 420px){
+    .novedad{grid-template-columns:64px 1fr; gap:12px;}
+    .novedad-img{width:64px; height:64px;}
   }
 </style>
 </head>
@@ -334,7 +347,7 @@
     <p data-es="Cientista Familiar (UFT) y Magíster en Sociología (PUC)." data-en="Family Scientist (UFT) and M.A. in Sociology (PUC).">Cientista Familiar (UFT) y Magíster en Sociología (PUC).</p>
     <p data-es='Investigador asociado al <a href="https://encuestas.uc.cl/">Centro de Encuestas y Estudios Longitudinales UC</a>.' data-en='Associate researcher at the <a href="https://encuestas.uc.cl/">Centro de Encuestas y Estudios Longitudinales UC</a>.'>Investigador asociado al <a href="https://encuestas.uc.cl/">Centro de Encuestas y Estudios Longitudinales UC</a>.</p>
     <p data-es="Profesor honorario Universidad Finis Terrae." data-en="Honorary professor, Universidad Finis Terrae.">Profesor honorario Universidad Finis Terrae.</p>
-    <p data-es="Miembro fundador y director general de Agenda Pública Consultores." data-en="Founding member and general director of Agenda Pública Consultores.">Miembro fundador y director general de Agenda Pública Consultores.</p>
+    <p data-es='Miembro fundador y director general de <a href="https://agenda-publica.com/">Agenda Pública Consultores</a>.' data-en='Founding member and general director of <a href="https://agenda-publica.com/">Agenda Pública Consultores</a>.'>Miembro fundador y director general de <a href="https://agenda-publica.com/">Agenda Pública Consultores</a>.</p>
     <p data-es="Miembro de la Sociedad Chilena de Estadística (SOCHE)." data-en="Member of the Sociedad Chilena de Estadística (SOCHE).">Miembro de la Sociedad Chilena de Estadística (SOCHE).</p>
 
     <div class="contact">
@@ -365,24 +378,36 @@
 
 <div class="right-panel">
   <aside class="novedades">
-    <p class="label" data-es="Novedades" data-en="News">Novedades</p>
-
-    <div class="novedad">
-      <span class="novedad-date">23.10.2026</span>
-      <a class="novedad-img foto" href="jne-2026.html"><img src="img/jne-2026/01.jpg" alt="Ponencia en las Jornadas Nacionales de Estadística 2026"></a>
-      <p data-es='Ponencia en las <a href="jne-2026.html">XLVIII Jornadas Nacionales de Estadística (SOCHE) 2026</a> (Valparaíso): "Lírica musical chilena", junto a Tomás Barrientos.' data-en='Talk at the <a href="jne-2026.html">XLVIII Jornadas Nacionales de Estadística (SOCHE) 2026</a> (Valparaíso): "Lírica musical chilena", with Tomás Barrientos.'>Ponencia en las <a href="jne-2026.html">XLVIII Jornadas Nacionales de Estadística (SOCHE) 2026</a> (Valparaíso): "Lírica musical chilena", junto a Tomás Barrientos.</p>
+    <div class="ventana-barra">
+      <span class="ventana-puntos" aria-hidden="true"><i></i><i></i><i></i></span>
+      <p class="label" data-es="Novedades" data-en="News">Novedades</p>
+      <span class="ventana-cuenta">03</span>
     </div>
 
-    <div class="novedad">
-      <span class="novedad-date">01.10.2026</span>
-      <a class="novedad-img foto" href="triada-2026.html"><img src="img/triada-2026/01.jpg" alt="Ponencia en el Congreso La Tríada 2026"></a>
-      <p data-es='Ponencia en el <a href="triada-2026.html">4º Congreso La Tríada 2026</a> (CDMX): "La confianza ya viene", eje Estado y emociones.' data-en='Talk at the <a href="triada-2026.html">4th La Tríada Congress 2026</a> (Mexico City): "La confianza ya viene", State and emotions track.'>Ponencia en el <a href="triada-2026.html">4º Congreso La Tríada 2026</a> (CDMX): "La confianza ya viene", eje Estado y emociones.</p>
-    </div>
+    <div class="ventana-cuerpo">
+      <div class="novedad">
+        <a class="novedad-img" href="jne-2026.html"><img src="img/jne-2026/01.jpg" alt="Ponencia en las Jornadas Nacionales de Estadística 2026"></a>
+        <div>
+          <span class="novedad-date">23.10.2026</span>
+          <p data-es='Ponencia en las <a href="jne-2026.html">XLVIII Jornadas Nacionales de Estadística (SOCHE) 2026</a> (Valparaíso): "Lírica musical chilena", junto a Tomás Barrientos.' data-en='Talk at the <a href="jne-2026.html">XLVIII Jornadas Nacionales de Estadística (SOCHE) 2026</a> (Valparaíso): "Lírica musical chilena", with Tomás Barrientos.'>Ponencia en las <a href="jne-2026.html">XLVIII Jornadas Nacionales de Estadística (SOCHE) 2026</a> (Valparaíso): "Lírica musical chilena", junto a Tomás Barrientos.</p>
+        </div>
+      </div>
 
-    <div class="novedad">
-      <span class="novedad-date">30.03.2026</span>
-      <div class="novedad-img"><img src="ciper-cadem.png" alt="CIPER"></div>
-      <p data-es='Columna en CIPER: <a href="https://www.ciperchile.cl/2026/03/30/nueva-metodologia-cadem-y-el-arte-de-parecer-riguroso/">"Nueva metodología Cadem y el arte de parecer riguroso"</a>.' data-en='Op-ed in CIPER: <a href="https://www.ciperchile.cl/2026/03/30/nueva-metodologia-cadem-y-el-arte-de-parecer-riguroso/">"Nueva metodología Cadem y el arte de parecer riguroso"</a>.'>Columna en CIPER: <a href="https://www.ciperchile.cl/2026/03/30/nueva-metodologia-cadem-y-el-arte-de-parecer-riguroso/">"Nueva metodología Cadem y el arte de parecer riguroso"</a>.</p>
+      <div class="novedad">
+        <a class="novedad-img" href="triada-2026.html"><img src="img/triada-2026/01.jpg" alt="Ponencia en el Congreso La Tríada 2026"></a>
+        <div>
+          <span class="novedad-date">01.10.2026</span>
+          <p data-es='Ponencia en el <a href="triada-2026.html">4º Congreso La Tríada 2026</a> (CDMX): "La confianza ya viene", eje Estado y emociones.' data-en='Talk at the <a href="triada-2026.html">4th La Tríada Congress 2026</a> (Mexico City): "La confianza ya viene", State and emotions track.'>Ponencia en el <a href="triada-2026.html">4º Congreso La Tríada 2026</a> (CDMX): "La confianza ya viene", eje Estado y emociones.</p>
+        </div>
+      </div>
+
+      <div class="novedad">
+        <a class="novedad-img" href="https://www.ciperchile.cl/2026/03/30/nueva-metodologia-cadem-y-el-arte-de-parecer-riguroso/"><img src="ciper-cadem.png" alt="CIPER"></a>
+        <div>
+          <span class="novedad-date">30.03.2026</span>
+          <p data-es='Columna en CIPER: <a href="https://www.ciperchile.cl/2026/03/30/nueva-metodologia-cadem-y-el-arte-de-parecer-riguroso/">"Nueva metodología Cadem y el arte de parecer riguroso"</a>.' data-en='Op-ed in CIPER: <a href="https://www.ciperchile.cl/2026/03/30/nueva-metodologia-cadem-y-el-arte-de-parecer-riguroso/">"Nueva metodología Cadem y el arte de parecer riguroso"</a>.'>Columna en CIPER: <a href="https://www.ciperchile.cl/2026/03/30/nueva-metodologia-cadem-y-el-arte-de-parecer-riguroso/">"Nueva metodología Cadem y el arte de parecer riguroso"</a>.</p>
+        </div>
+      </div>
     </div>
   </aside>
 </div>
